@@ -1,0 +1,62 @@
+# name: test/sql/bonds.test
+# description: Fixed-rate bond price, yield, duration, convexity
+# group: [vgi_quant]
+
+require-env VGI_QUANT_WORKER
+
+statement ok
+LOAD vgi;
+
+statement ok
+ATTACH 'quant' AS quant (TYPE vgi, LOCATION '${VGI_QUANT_WORKER}');
+
+# A par bond (coupon == yield) prices to face.
+query I
+SELECT ROUND(quant.bond_price(100, 0.05, 0.05, 10, 2), 2);
+----
+100.00
+
+# Coupon above yield -> premium (> face).
+query I
+SELECT quant.bond_price(100, 0.06, 0.05, 10, 2) > 100;
+----
+true
+
+# Coupon below yield -> discount (< face).
+query I
+SELECT quant.bond_price(100, 0.04, 0.05, 10, 2) < 100;
+----
+true
+
+# bond_yield inverts bond_price (par-priced 5% bond yields ~0.05).
+query I
+SELECT ROUND(quant.bond_yield(100, 100, 0.05, 10, 2), 3);
+----
+0.05
+
+# Modified duration is positive and shorter than maturity.
+query I
+SELECT quant.bond_duration(100, 0.05, 0.05, 10, 2) > 0
+   AND quant.bond_duration(100, 0.05, 0.05, 10, 2) < 10;
+----
+true
+
+# Convexity is positive.
+query I
+SELECT quant.bond_convexity(100, 0.05, 0.05, 10, 2) > 0;
+----
+true
+
+# NULL input -> NULL output.
+query I
+SELECT quant.bond_price(NULL, 0.05, 0.05, 10, 2) IS NULL;
+----
+true
+
+# Unknown coupon frequency raises.
+statement error
+SELECT quant.bond_price(100, 0.05, 0.05, 10, 3);
+----
+
+statement ok
+DETACH quant;

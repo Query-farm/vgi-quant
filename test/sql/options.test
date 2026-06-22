@@ -1,0 +1,63 @@
+# name: test/sql/options.test
+# description: Black-Scholes option pricing, Greeks, and implied vol
+# group: [vgi_quant]
+
+require-env VGI_QUANT_WORKER
+
+statement ok
+LOAD vgi;
+
+statement ok
+ATTACH 'quant' AS quant (TYPE vgi, LOCATION '${VGI_QUANT_WORKER}');
+
+# Standard textbook BS call: spot=100, strike=100, rate=0.05, vol=0.2, ttm=1.
+query I
+SELECT ROUND(quant.bs_price(100, 100, 0.05, 0.2, 1, 'call'), 2);
+----
+10.45
+
+query I
+SELECT ROUND(quant.bs_delta(100, 100, 0.05, 0.2, 1, 'call'), 3);
+----
+0.637
+
+# Gamma is positive.
+query I
+SELECT quant.bs_gamma(100, 100, 0.05, 0.2, 1, 'call') > 0;
+----
+true
+
+# Put-call parity: C - P = spot - strike * exp(-rate * ttm).
+query I
+SELECT ROUND(
+  quant.bs_price(100, 100, 0.05, 0.2, 1, 'call')
+  - quant.bs_price(100, 100, 0.05, 0.2, 1, 'put')
+  - (100 - 100 * exp(-0.05 * 1)),
+2);
+----
+0.0
+
+# Implied vol round-trips the input vol from the BS price.
+query I
+SELECT ROUND(quant.implied_vol(quant.bs_price(100, 100, 0.05, 0.2, 1, 'call'), 100, 100, 0.05, 1, 'call'), 3);
+----
+0.2
+
+# NULL input -> NULL output.
+query I
+SELECT quant.bs_price(NULL, 100, 0.05, 0.2, 1, 'call') IS NULL;
+----
+true
+
+# Unknown option type raises a clear error.
+statement error
+SELECT quant.bs_price(100, 100, 0.05, 0.2, 1, 'straddle');
+----
+
+# ttm <= 0 raises.
+statement error
+SELECT quant.bs_price(100, 100, 0.05, 0.2, 0, 'call');
+----
+
+statement ok
+DETACH quant;
