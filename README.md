@@ -4,7 +4,9 @@
 
 <p align="center"><em>A <a href="https://query.farm">Query.Farm</a> VGI worker for DuckDB.</em></p>
 
-# vgi-quant
+# Option Pricing, Greeks & Bond Analytics in DuckDB
+
+> **vgi-quant** · a [Query.Farm](https://query.farm) VGI worker · powered by QuantLib
 
 [![CI](https://github.com/Query-farm/vgi-quant/actions/workflows/ci.yml/badge.svg)](https://github.com/Query-farm/vgi-quant/actions/workflows/ci.yml)
 
