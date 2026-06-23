@@ -1,3 +1,9 @@
+<p align="center">
+  <img src="docs/vgi-logo.png" alt="Vector Gateway Interface (VGI)" width="320">
+</p>
+
+<p align="center"><em>A <a href="https://query.farm">Query.Farm</a> VGI worker for DuckDB.</em></p>
+
 # vgi-quant
 
 [![CI](https://github.com/Query-farm/vgi-quant/actions/workflows/ci.yml/badge.svg)](https://github.com/Query-farm/vgi-quant/actions/workflows/ci.yml)
@@ -128,3 +134,12 @@ on `PATH` (`export PATH="$HOME/.local/bin:$PATH"`); the Makefile points
 
 MIT (see [LICENSE](LICENSE)). QuantLib is distributed under a permissive
 modified-BSD license.
+
+---
+
+## Authorship & License
+
+Written by [Query.Farm](https://query.farm) — every VGI worker is designed and built by Query.Farm.
+
+Copyright 2026 Query Farm LLC - https://query.farm
+
