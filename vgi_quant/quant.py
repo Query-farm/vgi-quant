@@ -47,6 +47,7 @@ from __future__ import annotations
 import math
 from collections.abc import Callable
 from datetime import date
+from typing import Any
 
 import QuantLib as ql
 
@@ -69,13 +70,13 @@ _NULL_CALENDAR = ql.NullCalendar()
 def _option_type(opt_type: str) -> int:
     key = opt_type.strip().lower()
     if key == "call":
-        return ql.Option.Call
+        return int(ql.Option.Call)
     if key == "put":
-        return ql.Option.Put
+        return int(ql.Option.Put)
     raise ValueError(f"unknown option type {opt_type!r}; expected 'call' or 'put'")
 
 
-def _calculator(spot: float, strike: float, rate: float, vol: float, ttm: float, opt_type: str):
+def _calculator(spot: float, strike: float, rate: float, vol: float, ttm: float, opt_type: str) -> Any:
     """Build a configured ``ql.BlackCalculator`` or raise ``ValueError``."""
     if ttm <= 0:
         raise ValueError(f"ttm must be > 0, got {ttm}")
@@ -94,32 +95,32 @@ def _calculator(spot: float, strike: float, rate: float, vol: float, ttm: float,
 
 def bs_price(spot: float, strike: float, rate: float, vol: float, ttm: float, opt_type: str) -> float:
     """Black-Scholes price of a European option (``opt_type`` 'call'|'put')."""
-    return _calculator(spot, strike, rate, vol, ttm, opt_type).value()
+    return float(_calculator(spot, strike, rate, vol, ttm, opt_type).value())
 
 
 def bs_delta(spot: float, strike: float, rate: float, vol: float, ttm: float, opt_type: str) -> float:
     """d(value)/d(spot) of a European option."""
-    return _calculator(spot, strike, rate, vol, ttm, opt_type).delta(spot)
+    return float(_calculator(spot, strike, rate, vol, ttm, opt_type).delta(spot))
 
 
 def bs_gamma(spot: float, strike: float, rate: float, vol: float, ttm: float, opt_type: str) -> float:
     """d2(value)/d(spot)2 of a European option."""
-    return _calculator(spot, strike, rate, vol, ttm, opt_type).gamma(spot)
+    return float(_calculator(spot, strike, rate, vol, ttm, opt_type).gamma(spot))
 
 
 def bs_vega(spot: float, strike: float, rate: float, vol: float, ttm: float, opt_type: str) -> float:
     """d(value)/d(vol), per 1.00 (100 pct points) of volatility."""
-    return _calculator(spot, strike, rate, vol, ttm, opt_type).vega(ttm)
+    return float(_calculator(spot, strike, rate, vol, ttm, opt_type).vega(ttm))
 
 
 def bs_theta(spot: float, strike: float, rate: float, vol: float, ttm: float, opt_type: str) -> float:
     """d(value)/d(t), per year (calendar)."""
-    return _calculator(spot, strike, rate, vol, ttm, opt_type).theta(spot, ttm)
+    return float(_calculator(spot, strike, rate, vol, ttm, opt_type).theta(spot, ttm))
 
 
 def bs_rho(spot: float, strike: float, rate: float, vol: float, ttm: float, opt_type: str) -> float:
     """d(value)/d(rate), per 1.00 (100 pct points) of the rate."""
-    return _calculator(spot, strike, rate, vol, ttm, opt_type).rho(ttm)
+    return float(_calculator(spot, strike, rate, vol, ttm, opt_type).rho(ttm))
 
 
 def implied_vol(price: float, spot: float, strike: float, rate: float, ttm: float, opt_type: str) -> float:
@@ -143,7 +144,7 @@ def implied_vol(price: float, spot: float, strike: float, rate: float, ttm: floa
         std_dev = ql.blackFormulaImpliedStdDev(opt, strike, forward, price, discount)
     except RuntimeError as exc:  # QuantLib raises on out-of-range / non-invertible prices.
         raise ValueError(f"cannot invert implied vol from price {price}: {exc}") from exc
-    return std_dev / math.sqrt(ttm)
+    return float(std_dev) / math.sqrt(ttm)
 
 
 # ===========================================================================
@@ -193,7 +194,7 @@ def bond_price(face: float, coupon_rate: float, yield_rate: float, years: int, f
     """
     bond = _build_bond(face, coupon_rate, years, freq)
     rate = ql.InterestRate(yield_rate, _BOND_DC, ql.Compounded, _frequency(freq))
-    return ql.BondFunctions.cleanPrice(bond, rate)
+    return float(ql.BondFunctions.cleanPrice(bond, rate))
 
 
 def bond_yield(price: float, face: float, coupon_rate: float, years: int, freq: int) -> float:
@@ -202,21 +203,21 @@ def bond_yield(price: float, face: float, coupon_rate: float, years: int, freq: 
         raise ValueError(f"price must be > 0, got {price}")
     bond = _build_bond(face, coupon_rate, years, freq)
     bond_price_obj = ql.BondPrice(price, ql.BondPrice.Clean)
-    return ql.BondFunctions.bondYield(bond, bond_price_obj, _BOND_DC, ql.Compounded, _frequency(freq))
+    return float(ql.BondFunctions.bondYield(bond, bond_price_obj, _BOND_DC, ql.Compounded, _frequency(freq)))
 
 
 def bond_duration(face: float, coupon_rate: float, yield_rate: float, years: int, freq: int) -> float:
     """Modified duration of a fixed-rate bond at a given yield."""
     bond = _build_bond(face, coupon_rate, years, freq)
     rate = ql.InterestRate(yield_rate, _BOND_DC, ql.Compounded, _frequency(freq))
-    return ql.BondFunctions.duration(bond, rate, ql.Duration.Modified)
+    return float(ql.BondFunctions.duration(bond, rate, ql.Duration.Modified))
 
 
 def bond_convexity(face: float, coupon_rate: float, yield_rate: float, years: int, freq: int) -> float:
     """Convexity of a fixed-rate bond at a given yield."""
     bond = _build_bond(face, coupon_rate, years, freq)
     rate = ql.InterestRate(yield_rate, _BOND_DC, ql.Compounded, _frequency(freq))
-    return ql.BondFunctions.convexity(bond, rate)
+    return float(ql.BondFunctions.convexity(bond, rate))
 
 
 # ===========================================================================
@@ -246,9 +247,7 @@ def _day_counter(convention: str) -> ql.DayCounter:
     key = convention.strip().upper()
     counter = _DAY_COUNTERS.get(key)
     if counter is None:
-        raise ValueError(
-            f"unknown day-count convention {convention!r}; expected one of {sorted(_DAY_COUNTERS)}"
-        )
+        raise ValueError(f"unknown day-count convention {convention!r}; expected one of {sorted(_DAY_COUNTERS)}")
     return counter
 
 
@@ -263,7 +262,7 @@ def year_fraction(start: date, end: date, convention: str) -> float:
     An unknown convention raises ``ValueError``.
     """
     counter = _day_counter(convention)
-    return counter.yearFraction(_to_ql_date(start), _to_ql_date(end))
+    return float(counter.yearFraction(_to_ql_date(start), _to_ql_date(end)))
 
 
 def discount_factor(rate: float, ttm: float) -> float:

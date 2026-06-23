@@ -52,6 +52,8 @@ class DayCountConventionsFunction(TableFunctionGenerator[_NoArgs]):
     FIXED_SCHEMA: ClassVar[pa.Schema] = _CONVENTIONS_SCHEMA
 
     class Meta:
+        """Function metadata."""
+
         name = "day_count_conventions"
         description = "Every day-count convention string year_fraction() supports"
         categories = ["quant", "conventions"]
@@ -68,10 +70,12 @@ class DayCountConventionsFunction(TableFunctionGenerator[_NoArgs]):
 
     @classmethod
     def cardinality(cls, params: BindParams[_NoArgs]) -> TableCardinality:
+        """Estimated and maximum row count for the planner."""
         return TableCardinality(estimate=8, max=64)
 
     @classmethod
     def process(cls, params: ProcessParams[_NoArgs], state: None, out: OutputCollector) -> None:
+        """Emit the discovery rows for this invocation."""
         out.emit(
             pa.RecordBatch.from_pydict(
                 {"name": quant.day_count_conventions()},

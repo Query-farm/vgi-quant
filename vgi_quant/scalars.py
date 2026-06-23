@@ -93,6 +93,8 @@ def _make_option_scalar(fname: str, summary: str, example_extra: str) -> type[Sc
 
     class _OptionScalar(ScalarFunction):
         class Meta:
+            """Function metadata."""
+
             name = fname
             description = summary
             categories = ["quant", "options"]
@@ -113,6 +115,7 @@ def _make_option_scalar(fname: str, summary: str, example_extra: str) -> type[Sc
             ttm: Annotated[pa.DoubleArray, _TTM],
             opt_type: Annotated[str, _OPT_TYPE],
         ) -> Annotated[pa.DoubleArray, Returns(_F64)]:
+            """Map each input row to its output value."""
             return _map_floats(
                 [spot, strike, rate, vol, ttm],
                 lambda s, k, r, v, t: compute_fn(s, k, r, v, t, opt_type),
@@ -155,10 +158,10 @@ class ImpliedVolFunction(ScalarFunction):
     """``implied_vol(price, spot, strike, rate, ttm, opt_type)`` -- BS implied vol."""
 
     class Meta:
+        """Function metadata."""
+
         name = "implied_vol"
-        description = (
-            "Black-Scholes implied volatility reproducing an option price (raises if not invertible)"
-        )
+        description = "Black-Scholes implied volatility reproducing an option price (raises if not invertible)"
         categories = ["quant", "options"]
         examples = [
             FunctionExample(
@@ -177,6 +180,7 @@ class ImpliedVolFunction(ScalarFunction):
         ttm: Annotated[pa.DoubleArray, _TTM],
         opt_type: Annotated[str, _OPT_TYPE],
     ) -> Annotated[pa.DoubleArray, Returns(_F64)]:
+        """Map each input row to its output value."""
         return _map_floats(
             [price, spot, strike, rate, ttm],
             lambda p, s, k, r, t: quant.implied_vol(p, s, k, r, t, opt_type),
@@ -198,6 +202,8 @@ class BondPriceFunction(ScalarFunction):
     """``bond_price(face, coupon_rate, yield_rate, years, freq)`` -- clean price."""
 
     class Meta:
+        """Function metadata."""
+
         name = "bond_price"
         description = "Clean price of a fixed-rate bond at a given yield (par bond prices to face)"
         categories = ["quant", "bonds"]
@@ -217,6 +223,7 @@ class BondPriceFunction(ScalarFunction):
         years: Annotated[pa.DoubleArray, _YEARS],
         freq: Annotated[int, _FREQ],
     ) -> Annotated[pa.DoubleArray, Returns(_F64)]:
+        """Map each input row to its output value."""
         return _map_floats(
             [face, coupon_rate, yield_rate, years],
             lambda f, c, y, yr: quant.bond_price(f, c, y, int(yr), freq),
@@ -227,6 +234,8 @@ class BondYieldFunction(ScalarFunction):
     """``bond_yield(price, face, coupon_rate, years, freq)`` -- yield to maturity."""
 
     class Meta:
+        """Function metadata."""
+
         name = "bond_yield"
         description = "Yield to maturity implied by a clean bond price (inverse of bond_price)"
         categories = ["quant", "bonds"]
@@ -246,6 +255,7 @@ class BondYieldFunction(ScalarFunction):
         years: Annotated[pa.DoubleArray, _YEARS],
         freq: Annotated[int, _FREQ],
     ) -> Annotated[pa.DoubleArray, Returns(_F64)]:
+        """Map each input row to its output value."""
         return _map_floats(
             [price, face, coupon_rate, years],
             lambda p, f, c, yr: quant.bond_yield(p, f, c, int(yr), freq),
@@ -256,6 +266,8 @@ class BondDurationFunction(ScalarFunction):
     """``bond_duration(face, coupon_rate, yield_rate, years, freq)`` -- modified duration."""
 
     class Meta:
+        """Function metadata."""
+
         name = "bond_duration"
         description = "Modified duration of a fixed-rate bond at a given yield"
         categories = ["quant", "bonds"]
@@ -275,6 +287,7 @@ class BondDurationFunction(ScalarFunction):
         years: Annotated[pa.DoubleArray, _YEARS],
         freq: Annotated[int, _FREQ],
     ) -> Annotated[pa.DoubleArray, Returns(_F64)]:
+        """Map each input row to its output value."""
         return _map_floats(
             [face, coupon_rate, yield_rate, years],
             lambda f, c, y, yr: quant.bond_duration(f, c, y, int(yr), freq),
@@ -285,6 +298,8 @@ class BondConvexityFunction(ScalarFunction):
     """``bond_convexity(face, coupon_rate, yield_rate, years, freq)`` -- convexity."""
 
     class Meta:
+        """Function metadata."""
+
         name = "bond_convexity"
         description = "Convexity of a fixed-rate bond at a given yield"
         categories = ["quant", "bonds"]
@@ -304,6 +319,7 @@ class BondConvexityFunction(ScalarFunction):
         years: Annotated[pa.DoubleArray, _YEARS],
         freq: Annotated[int, _FREQ],
     ) -> Annotated[pa.DoubleArray, Returns(_F64)]:
+        """Map each input row to its output value."""
         return _map_floats(
             [face, coupon_rate, yield_rate, years],
             lambda f, c, y, yr: quant.bond_convexity(f, c, y, int(yr), freq),
@@ -319,6 +335,8 @@ class YearFractionFunction(ScalarFunction):
     """``year_fraction(start, end, convention)`` -- day-count year fraction."""
 
     class Meta:
+        """Function metadata."""
+
         name = "year_fraction"
         description = (
             "Year fraction between two dates under a day-count convention "
@@ -339,6 +357,7 @@ class YearFractionFunction(ScalarFunction):
         end: Annotated[pa.Date32Array, Param(doc="End date.")],
         convention: Annotated[str, ConstParam("Day-count convention string; see day_count_conventions().")],
     ) -> Annotated[pa.DoubleArray, Returns(_F64)]:
+        """Map each input row to its output value."""
         return _map_dates(start, end, lambda s, e: quant.year_fraction(s, e, convention))
 
 
@@ -346,6 +365,8 @@ class DiscountFactorFunction(ScalarFunction):
     """``discount_factor(rate, ttm)`` -- continuously-compounded discount factor."""
 
     class Meta:
+        """Function metadata."""
+
         name = "discount_factor"
         description = "Continuously-compounded discount factor exp(-rate * ttm)"
         categories = ["quant", "conventions"]
@@ -362,6 +383,7 @@ class DiscountFactorFunction(ScalarFunction):
         rate: Annotated[pa.DoubleArray, _RATE],
         ttm: Annotated[pa.DoubleArray, Param(_F64, doc="Time horizon in years.")],
     ) -> Annotated[pa.DoubleArray, Returns(_F64)]:
+        """Map each input row to its output value."""
         return _map_floats([rate, ttm], quant.discount_factor)
 
 
@@ -369,6 +391,8 @@ class PresentValueFunction(ScalarFunction):
     """``present_value(amount, rate, ttm)`` -- continuously-discounted present value."""
 
     class Meta:
+        """Function metadata."""
+
         name = "present_value"
         description = "Present value amount * exp(-rate * ttm) (continuous compounding)"
         categories = ["quant", "conventions"]
@@ -386,6 +410,7 @@ class PresentValueFunction(ScalarFunction):
         rate: Annotated[pa.DoubleArray, _RATE],
         ttm: Annotated[pa.DoubleArray, Param(_F64, doc="Time horizon in years.")],
     ) -> Annotated[pa.DoubleArray, Returns(_F64)]:
+        """Map each input row to its output value."""
         return _map_floats([amount, rate, ttm], quant.present_value)
 
 

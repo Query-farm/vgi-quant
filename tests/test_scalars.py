@@ -74,9 +74,7 @@ class TestOptions:
         out = _call(
             client,
             "bs_price",
-            _f64cols(
-                spot=[100.0, None], strike=[100.0, 100.0], rate=[0.05, 0.05], vol=[0.2, 0.2], ttm=[1.0, 1.0]
-            ),
+            _f64cols(spot=[100.0, None], strike=[100.0, 100.0], rate=[0.05, 0.05], vol=[0.2, 0.2], ttm=[1.0, 1.0]),
             positional=[pa.scalar("call")],
         )
         assert out[1] is None
