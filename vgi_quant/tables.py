@@ -57,6 +57,14 @@ class DayCountConventionsFunction(TableFunctionGenerator[_NoArgs]):
         name = "day_count_conventions"
         description = "Every day-count convention string year_fraction() supports"
         categories = ["quant", "conventions"]
+        tags = {
+            "vgi.columns_md": (
+                "| column | type | description |\n"
+                "| --- | --- | --- |\n"
+                "| `name` | VARCHAR | A day-count convention string accepted as the trailing "
+                "`convention` argument to `year_fraction(start, end, convention)`. |\n"
+            ),
+        }
         examples = [
             FunctionExample(
                 sql="SELECT count(*) FROM quant.day_count_conventions()",
