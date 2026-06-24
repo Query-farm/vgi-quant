@@ -74,13 +74,29 @@ _SCHEMA_DESCRIPTION_LLM = (
 
 _SCHEMA_DESCRIPTION_MD = "Option pricing + Greeks, bond pricing/yield/duration, and day-count math over Apache Arrow."
 
+_SCHEMA_EXAMPLE_QUERIES = (
+    "SELECT quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'call');\n"
+    "SELECT quant.main.bs_delta(100, 100, 0.05, 0.2, 1, 'call');\n"
+    "SELECT quant.main.implied_vol(10.45, 100, 100, 0.05, 1, 'call');\n"
+    "SELECT quant.main.bond_price(100, 0.05, 0.05, 10, 2);\n"
+    "SELECT quant.main.bond_yield(100, 100, 0.05, 10, 2);\n"
+    "SELECT quant.main.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360');\n"
+    "SELECT quant.main.discount_factor(0.05, 1);\n"
+    "SELECT * FROM quant.main.day_count_conventions() ORDER BY name;"
+)
+
 _QUANT_CATALOG = Catalog(
     name="quant",
     default_schema="main",
     comment="Option pricing + Greeks, bond pricing/yield, and day-count math for SQL (QuantLib)",
     tags={
-        "vgi.description_llm": _CATALOG_DESCRIPTION_LLM,
-        "vgi.description_md": _CATALOG_DESCRIPTION_MD,
+        "vgi.title": "Quantitative Finance Math",
+        "vgi.keywords": (
+            "quant, quantitative finance, options, black-scholes, greeks, implied volatility, "
+            "bonds, yield, duration, convexity, day count, discounting, present value, quantlib"
+        ),
+        "vgi.doc_llm": _CATALOG_DESCRIPTION_LLM,
+        "vgi.doc_md": _CATALOG_DESCRIPTION_MD,
         "vgi.author": "Query.Farm",
         "vgi.copyright": "Copyright 2026 Query Farm LLC - https://query.farm",
         "vgi.license": "MIT",
@@ -93,8 +109,19 @@ _QUANT_CATALOG = Catalog(
             name="main",
             comment="Option/Greeks, bond, and day-count functions: the quant catalog's single schema",
             tags={
-                "vgi.description_llm": _SCHEMA_DESCRIPTION_LLM,
-                "vgi.description_md": _SCHEMA_DESCRIPTION_MD,
+                "vgi.title": "Quant — main",
+                "vgi.keywords": (
+                    "quant, options, greeks, black-scholes, implied volatility, bonds, yield, "
+                    "duration, convexity, year fraction, discount factor, present value"
+                ),
+                # VGI123 classifying tags use BARE keys (NOT vgi.-namespaced).
+                "domain": "finance",
+                "category": "quantitative-finance",
+                "topic": "option-and-bond-pricing",
+                "vgi.source_url": "https://github.com/Query-farm/vgi-quant/blob/main/quant_worker.py",
+                "vgi.doc_llm": _SCHEMA_DESCRIPTION_LLM,
+                "vgi.doc_md": _SCHEMA_DESCRIPTION_MD,
+                "vgi.example_queries": _SCHEMA_EXAMPLE_QUERIES,
             },
             functions=list(_FUNCTIONS),
         ),

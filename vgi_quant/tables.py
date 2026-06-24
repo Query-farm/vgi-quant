@@ -27,6 +27,7 @@ from vgi.table_function import (
 from vgi_rpc.rpc import OutputCollector
 
 from . import quant
+from .meta import object_tags
 from .schema_utils import field
 
 
@@ -58,7 +59,40 @@ class DayCountConventionsFunction(TableFunctionGenerator[_NoArgs]):
         description = "Every day-count convention string year_fraction() supports"
         categories = ["quant", "conventions"]
         tags = {
-            "vgi.columns_md": (
+            **object_tags(
+                title="Day-Count Conventions Catalog",
+                doc_llm=(
+                    "## day_count_conventions\n\n"
+                    "A discovery **table function** listing every day-count "
+                    "convention string accepted by `year_fraction`, one per "
+                    "row.\n\n"
+                    "**Signature:** `day_count_conventions()` -- takes no "
+                    "arguments and returns a single `name` column.\n\n"
+                    "Use it to discover the valid `convention` literals before "
+                    "calling `quant.year_fraction(start, end, convention)`. Each "
+                    "returned `name` (e.g. `ACT/360`, `30/360`) is a value you "
+                    "can pass directly as that trailing argument."
+                ),
+                doc_md=(
+                    "# Day-Count Conventions Catalog\n\n"
+                    "Lists the day-count convention strings `year_fraction` "
+                    "accepts.\n\n"
+                    "## Usage\n\n"
+                    "```sql\n"
+                    "SELECT * FROM quant.day_count_conventions() ORDER BY name;\n"
+                    "```\n\n"
+                    "## Notes\n\n"
+                    "- Set-returning table function (takes no arguments).\n"
+                    "- Each `name` is valid as the `convention` argument to "
+                    "`year_fraction`."
+                ),
+                keywords=(
+                    "day count, conventions, discovery, list conventions, act/360, 30/360, "
+                    "year fraction, day_count_conventions"
+                ),
+                relative_path="vgi_quant/tables.py",
+            ),
+            "vgi.result_columns_md": (
                 "| column | type | description |\n"
                 "| --- | --- | --- |\n"
                 "| `name` | VARCHAR | A day-count convention string accepted as the trailing "
