@@ -11,10 +11,12 @@ functions are *scalars* and live in :mod:`vgi_quant.scalars`.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from typing import ClassVar
 
 import pyarrow as pa
+from vgi.catalog import Table
 from vgi.metadata import FunctionExample
 from vgi.table_function import (
     BindParams,
@@ -86,11 +88,16 @@ class DayCountConventionsFunction(TableFunctionGenerator[_NoArgs]):
                     "- Each `name` is valid as the `convention` argument to "
                     "`year_fraction`."
                 ),
-                keywords=(
-                    "day count, conventions, discovery, list conventions, act/360, 30/360, "
-                    "year fraction, day_count_conventions"
-                ),
-                relative_path="vgi_quant/tables.py",
+                keywords=[
+                    "day count",
+                    "conventions",
+                    "discovery",
+                    "list conventions",
+                    "act/360",
+                    "30/360",
+                    "year fraction",
+                    "day_count_conventions",
+                ],
             ),
             "vgi.result_columns_md": (
                 "| column | type | description |\n"
@@ -129,4 +136,83 @@ class DayCountConventionsFunction(TableFunctionGenerator[_NoArgs]):
 
 TABLE_FUNCTIONS: list[type] = [
     DayCountConventionsFunction,
+]
+
+# VGI311: a parameterless table function always yields the same rows, so it
+# should also be reachable as a regular table — `SELECT * FROM
+# quant.day_count_conventions` (no parentheses). This function-backed Table
+# scans the same generator above; the parenthesized function form stays
+# available too. It carries its own full discovery metadata (the rules treat a
+# table as a first-class object).
+DAY_COUNT_CONVENTIONS_TABLE = Table(
+    name="day_count_conventions",
+    function=DayCountConventionsFunction,
+    comment="The day-count convention strings year_fraction() accepts, one per row",
+    not_null=("name",),
+    primary_key=(("name",),),
+    tags={
+        **object_tags(
+            title="Day-Count Conventions Reference Table",
+            doc_llm=(
+                "## day_count_conventions (table)\n\n"
+                "A reference **table** of every day-count convention string "
+                "accepted by `year_fraction`, one per row, with a single `name` "
+                "column.\n\n"
+                "Query it as `SELECT * FROM quant.day_count_conventions` (no "
+                "parentheses) to discover the valid `convention` literals before "
+                "calling `quant.year_fraction(start, end, convention)`. Each "
+                "`name` (e.g. `ACT/360`, `30/360`) is a value you can pass "
+                "directly as that trailing argument. The identical rows are also "
+                "reachable via the `day_count_conventions()` table function."
+            ),
+            doc_md=(
+                "# Day-Count Conventions Reference Table\n\n"
+                "Lists the day-count convention strings `year_fraction` accepts.\n\n"
+                "## Usage\n\n"
+                "```sql\n"
+                "SELECT * FROM quant.day_count_conventions ORDER BY name;\n"
+                "```\n\n"
+                "## Notes\n\n"
+                "- One row per supported convention; `name` is the primary key.\n"
+                "- Each `name` is valid as the `convention` argument to "
+                "`year_fraction`."
+            ),
+            keywords=[
+                "day count",
+                "conventions",
+                "discovery",
+                "list conventions",
+                "act/360",
+                "30/360",
+                "year fraction",
+                "day_count_conventions",
+            ],
+        ),
+        # VGI123 classifying tags use BARE keys (NOT vgi.-namespaced).
+        "domain": "finance",
+        "category": "quantitative-finance",
+        "topic": "day-count-conventions",
+        "vgi.example_queries": json.dumps(
+            [
+                {
+                    "description": "List the supported day-count conventions.",
+                    "sql": "SELECT * FROM quant.main.day_count_conventions ORDER BY name",
+                },
+                {
+                    "description": "Count how many day-count conventions are supported.",
+                    "sql": "SELECT count(*) FROM quant.main.day_count_conventions",
+                },
+            ]
+        ),
+        "vgi.result_columns_md": (
+            "| column | type | description |\n"
+            "| --- | --- | --- |\n"
+            "| `name` | VARCHAR | A day-count convention string accepted as the trailing "
+            "`convention` argument to `year_fraction(start, end, convention)`. |\n"
+        ),
+    },
+)
+
+TABLES: list[Table] = [
+    DAY_COUNT_CONVENTIONS_TABLE,
 ]

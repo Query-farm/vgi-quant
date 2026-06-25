@@ -42,8 +42,6 @@ from .meta import object_tags
 
 _F64 = pa.float64()
 
-_SCALARS_PATH = "vgi_quant/scalars.py"
-
 # VGI509: a JSON string of guaranteed-runnable, catalog-qualified examples. Each
 # `sql` is self-contained and re-runnable against an attached `quant` worker; we
 # omit `expected_result` (the linter only requires clean execution, and pinning
@@ -117,7 +115,7 @@ def _make_option_scalar(
     title: str,
     doc_llm: str,
     doc_md: str,
-    keywords: str,
+    keywords: list[str],
 ) -> type[ScalarFunction]:
     """Build a 6-arg option scalar class for one of the BS price/Greek funcs.
 
@@ -128,7 +126,7 @@ def _make_option_scalar(
         title: Human-friendly display name (VGI124).
         doc_llm: Markdown narrative for an LLM/agent audience (VGI112).
         doc_md: Markdown narrative for human docs (VGI113).
-        keywords: Comma-separated search terms / synonyms (VGI126).
+        keywords: Search terms / synonyms (VGI126) as a list of strings.
 
     Returns:
         A configured ``ScalarFunction`` subclass.
@@ -139,7 +137,6 @@ def _make_option_scalar(
         doc_llm=doc_llm,
         doc_md=doc_md,
         keywords=keywords,
-        relative_path=_SCALARS_PATH,
     )
 
     class _OptionScalar(ScalarFunction):
@@ -214,7 +211,16 @@ BsPriceFunction = _make_option_scalar(
         "- No dividend yield is modeled; carry equals the risk-free `rate`.\n"
         "- At-the-money 1y example above returns roughly `10.4506`."
     ),
-    keywords="black-scholes, option price, european option, call, put, premium, derivatives, bs_price",
+    keywords=[
+        "black-scholes",
+        "option price",
+        "european option",
+        "call",
+        "put",
+        "premium",
+        "derivatives",
+        "bs_price",
+    ],
 )
 BsDeltaFunction = _make_option_scalar(
     "bs_delta",
@@ -242,7 +248,15 @@ BsDeltaFunction = _make_option_scalar(
         "- Calls have positive delta (0..1); puts negative (-1..0).\n"
         "- Commonly used as a hedge ratio against the underlying."
     ),
-    keywords="black-scholes, delta, greeks, hedge ratio, option sensitivity, spot, bs_delta",
+    keywords=[
+        "black-scholes",
+        "delta",
+        "greeks",
+        "hedge ratio",
+        "option sensitivity",
+        "spot",
+        "bs_delta",
+    ],
 )
 BsGammaFunction = _make_option_scalar(
     "bs_gamma",
@@ -269,7 +283,15 @@ BsGammaFunction = _make_option_scalar(
         "- Equal for a call and its matching put.\n"
         "- Peaks at-the-money and as expiry approaches."
     ),
-    keywords="black-scholes, gamma, greeks, convexity, delta change, option sensitivity, bs_gamma",
+    keywords=[
+        "black-scholes",
+        "gamma",
+        "greeks",
+        "convexity",
+        "delta change",
+        "option sensitivity",
+        "bs_gamma",
+    ],
 )
 BsVegaFunction = _make_option_scalar(
     "bs_vega",
@@ -297,7 +319,15 @@ BsVegaFunction = _make_option_scalar(
         "- Per 1.00 vol; divide by 100 for per-1% vega.\n"
         "- Equal for a call and its matching put."
     ),
-    keywords="black-scholes, vega, greeks, volatility sensitivity, vol, option sensitivity, bs_vega",
+    keywords=[
+        "black-scholes",
+        "vega",
+        "greeks",
+        "volatility sensitivity",
+        "vol",
+        "option sensitivity",
+        "bs_vega",
+    ],
 )
 BsThetaFunction = _make_option_scalar(
     "bs_theta",
@@ -324,7 +354,15 @@ BsThetaFunction = _make_option_scalar(
         "- Per year; divide by 365 for per-day theta.\n"
         "- Usually negative for long options."
     ),
-    keywords="black-scholes, theta, greeks, time decay, time value, option sensitivity, bs_theta",
+    keywords=[
+        "black-scholes",
+        "theta",
+        "greeks",
+        "time decay",
+        "time value",
+        "option sensitivity",
+        "bs_theta",
+    ],
 )
 BsRhoFunction = _make_option_scalar(
     "bs_rho",
@@ -350,7 +388,15 @@ BsRhoFunction = _make_option_scalar(
         "- Per 1.00 rate; divide by 100 for per-1% rho.\n"
         "- Positive for calls, negative for puts."
     ),
-    keywords="black-scholes, rho, greeks, interest rate sensitivity, rate, option sensitivity, bs_rho",
+    keywords=[
+        "black-scholes",
+        "rho",
+        "greeks",
+        "interest rate sensitivity",
+        "rate",
+        "option sensitivity",
+        "bs_rho",
+    ],
 )
 
 
@@ -390,8 +436,15 @@ class ImpliedVolFunction(ScalarFunction):
                 "- Round-trips `bs_price`: feeding its output recovers the vol.\n"
                 "- Raises if the price is not invertible (e.g. below intrinsic)."
             ),
-            keywords="black-scholes, implied volatility, iv, invert, option price, vol surface, implied_vol",
-            relative_path=_SCALARS_PATH,
+            keywords=[
+                "black-scholes",
+                "implied volatility",
+                "iv",
+                "invert",
+                "option price",
+                "vol surface",
+                "implied_vol",
+            ],
         )
         examples = [
             FunctionExample(
@@ -464,8 +517,15 @@ class BondPriceFunction(ScalarFunction):
                 "- Uses ActualActual(ISDA), compounded at the coupon frequency.\n"
                 "- A par bond (coupon == yield) prices to face value."
             ),
-            keywords="bond, fixed-rate bond, clean price, present value, coupon, fixed income, bond_price",
-            relative_path=_SCALARS_PATH,
+            keywords=[
+                "bond",
+                "fixed-rate bond",
+                "clean price",
+                "present value",
+                "coupon",
+                "fixed income",
+                "bond_price",
+            ],
         )
         examples = [
             FunctionExample(
@@ -526,8 +586,15 @@ class BondYieldFunction(ScalarFunction):
                 "- Inverts `bond_price`: feed its output to recover the yield.\n"
                 "- `freq` must be a literal `1`, `2`, `4`, or `12`."
             ),
-            keywords="bond, yield to maturity, ytm, fixed income, invert price, coupon, bond_yield",
-            relative_path=_SCALARS_PATH,
+            keywords=[
+                "bond",
+                "yield to maturity",
+                "ytm",
+                "fixed income",
+                "invert price",
+                "coupon",
+                "bond_yield",
+            ],
         )
         examples = [
             FunctionExample(
@@ -588,8 +655,14 @@ class BondDurationFunction(ScalarFunction):
                 "- A 1% yield rise drops price by roughly `duration%`.\n"
                 "- Always less than maturity for a coupon-paying bond."
             ),
-            keywords="bond, modified duration, interest rate risk, sensitivity, fixed income, bond_duration",
-            relative_path=_SCALARS_PATH,
+            keywords=[
+                "bond",
+                "modified duration",
+                "interest rate risk",
+                "sensitivity",
+                "fixed income",
+                "bond_duration",
+            ],
         )
         examples = [
             FunctionExample(
@@ -650,8 +723,14 @@ class BondConvexityFunction(ScalarFunction):
                 "- Refines the duration-based price-change estimate.\n"
                 "- Larger for longer maturities and lower coupons."
             ),
-            keywords="bond, convexity, interest rate risk, second order, fixed income, bond_convexity",
-            relative_path=_SCALARS_PATH,
+            keywords=[
+                "bond",
+                "convexity",
+                "interest rate risk",
+                "second order",
+                "fixed income",
+                "bond_convexity",
+            ],
         )
         examples = [
             FunctionExample(
@@ -722,10 +801,17 @@ class YearFractionFunction(ScalarFunction):
                     "- Convention matching is case-insensitive.\n"
                     "- See `day_count_conventions()` for the full list."
                 ),
-                keywords=(
-                    "day count, year fraction, accrual, act/360, act/365, 30/360, act/act, convention, year_fraction"
-                ),
-                relative_path=_SCALARS_PATH,
+                keywords=[
+                    "day count",
+                    "year fraction",
+                    "accrual",
+                    "act/360",
+                    "act/365",
+                    "30/360",
+                    "act/act",
+                    "convention",
+                    "year_fraction",
+                ],
             ),
             "vgi.executable_examples": _YEAR_FRACTION_EXECUTABLE_EXAMPLES,
         }
@@ -739,8 +825,8 @@ class YearFractionFunction(ScalarFunction):
     @classmethod
     def compute(
         cls,
-        start: Annotated[pa.Date32Array, Param(doc="Start date.")],
-        end: Annotated[pa.Date32Array, Param(doc="End date.")],
+        start: Annotated[pa.Date32Array, Param(doc="Start of the accrual period (inclusive).")],
+        end: Annotated[pa.Date32Array, Param(doc="End of the accrual period; the span runs from start to here.")],
         convention: Annotated[str, ConstParam("Day-count convention string; see day_count_conventions().")],
     ) -> Annotated[pa.DoubleArray, Returns(_F64)]:
         """Map each input row to its output value."""
@@ -781,8 +867,14 @@ class DiscountFactorFunction(ScalarFunction):
                 "- Continuous compounding (not periodic).\n"
                 "- Multiply a future amount by this to get its present value."
             ),
-            keywords="discount factor, present value, continuous compounding, exp, discounting, discount_factor",
-            relative_path=_SCALARS_PATH,
+            keywords=[
+                "discount factor",
+                "present value",
+                "continuous compounding",
+                "exp",
+                "discounting",
+                "discount_factor",
+            ],
         )
         examples = [
             FunctionExample(
@@ -833,8 +925,14 @@ class PresentValueFunction(ScalarFunction):
                 "- Continuous compounding.\n"
                 "- Equals `amount * discount_factor(rate, ttm)`."
             ),
-            keywords="present value, discounting, npv, continuous compounding, time value of money, present_value",
-            relative_path=_SCALARS_PATH,
+            keywords=[
+                "present value",
+                "discounting",
+                "npv",
+                "continuous compounding",
+                "time value of money",
+                "present_value",
+            ],
         )
         examples = [
             FunctionExample(

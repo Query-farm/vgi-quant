@@ -1,7 +1,7 @@
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
-#     "vgi-python[http]>=0.8.4",
+#     "vgi-python[http]>=0.8.5",
 #     "QuantLib>=1.42",
 #     "pyarrow",
 # ]
@@ -33,11 +33,13 @@ Usage:
 
 from __future__ import annotations
 
+import json
+
 from vgi import Worker
 from vgi.catalog import Catalog, Schema
 
 from vgi_quant.scalars import SCALAR_FUNCTIONS
-from vgi_quant.tables import TABLE_FUNCTIONS
+from vgi_quant.tables import TABLE_FUNCTIONS, TABLES
 
 _FUNCTIONS: list[type] = [
     *SCALAR_FUNCTIONS,
@@ -72,7 +74,17 @@ _SCHEMA_DESCRIPTION_LLM = (
     "value functions."
 )
 
-_SCHEMA_DESCRIPTION_MD = "Option pricing + Greeks, bond pricing/yield/duration, and day-count math over Apache Arrow."
+_SCHEMA_DESCRIPTION_MD = (
+    "The single schema of the `quant` catalog, grouping every quantitative-finance "
+    "function over Apache Arrow. It contains the Black-Scholes option scalars "
+    "(`bs_price` plus the `bs_delta`/`bs_gamma`/`bs_vega`/`bs_theta`/`bs_rho` Greeks "
+    "and `implied_vol`), the fixed-rate bond scalars (`bond_price`, `bond_yield`, "
+    "`bond_duration`, `bond_convexity`), the day-count and continuous-discounting "
+    "scalars (`year_fraction`, `discount_factor`, `present_value`), and the "
+    "`day_count_conventions` reference table/function listing the accepted "
+    "day-count convention strings. Use it for option pricing and Greeks, bond "
+    "analytics, yield/duration, and day-count or present-value math directly in SQL."
+)
 
 _SCHEMA_EXAMPLE_QUERIES = (
     "SELECT quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'call');\n"
@@ -91,9 +103,23 @@ _QUANT_CATALOG = Catalog(
     comment="Option pricing + Greeks, bond pricing/yield, and day-count math for SQL (QuantLib)",
     tags={
         "vgi.title": "Quantitative Finance Math",
-        "vgi.keywords": (
-            "quant, quantitative finance, options, black-scholes, greeks, implied volatility, "
-            "bonds, yield, duration, convexity, day count, discounting, present value, quantlib"
+        "vgi.keywords": json.dumps(
+            [
+                "quant",
+                "quantitative finance",
+                "options",
+                "black-scholes",
+                "greeks",
+                "implied volatility",
+                "bonds",
+                "yield",
+                "duration",
+                "convexity",
+                "day count",
+                "discounting",
+                "present value",
+                "quantlib",
+            ]
         ),
         "vgi.doc_llm": _CATALOG_DESCRIPTION_LLM,
         "vgi.doc_md": _CATALOG_DESCRIPTION_MD,
@@ -110,20 +136,34 @@ _QUANT_CATALOG = Catalog(
             comment="Option/Greeks, bond, and day-count functions: the quant catalog's single schema",
             tags={
                 "vgi.title": "Quant — main",
-                "vgi.keywords": (
-                    "quant, options, greeks, black-scholes, implied volatility, bonds, yield, "
-                    "duration, convexity, year fraction, discount factor, present value"
+                "vgi.keywords": json.dumps(
+                    [
+                        "quant",
+                        "options",
+                        "greeks",
+                        "black-scholes",
+                        "implied volatility",
+                        "bonds",
+                        "yield",
+                        "duration",
+                        "convexity",
+                        "year fraction",
+                        "discount factor",
+                        "present value",
+                    ]
                 ),
                 # VGI123 classifying tags use BARE keys (NOT vgi.-namespaced).
                 "domain": "finance",
                 "category": "quantitative-finance",
                 "topic": "option-and-bond-pricing",
-                "vgi.source_url": "https://github.com/Query-farm/vgi-quant/blob/main/quant_worker.py",
                 "vgi.doc_llm": _SCHEMA_DESCRIPTION_LLM,
                 "vgi.doc_md": _SCHEMA_DESCRIPTION_MD,
                 "vgi.example_queries": _SCHEMA_EXAMPLE_QUERIES,
             },
             functions=list(_FUNCTIONS),
+            # VGI311: expose the parameterless table function as a regular table
+            # too (defined alongside the function in vgi_quant.tables).
+            tables=list(TABLES),
         ),
     ],
 )
