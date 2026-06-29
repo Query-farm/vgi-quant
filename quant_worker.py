@@ -57,6 +57,7 @@ _CATALOG_DESCRIPTION_LLM = (
 
 _CATALOG_DESCRIPTION_MD = (
     "# Quantitative Finance Math in SQL\n\n"
+    "![QuantLib logo](https://upload.wikimedia.org/wikipedia/commons/7/74/QL-title.jpg)\n\n"
     "**Price options, compute Black-Scholes Greeks, value fixed-rate bonds, and do day-count and "
     "discounting math directly in DuckDB SQL** — no spreadsheets, no external pricing service, no "
     "round-trips to Python. The `quant` catalog turns industry-standard quantitative-finance "
