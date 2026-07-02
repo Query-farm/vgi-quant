@@ -28,8 +28,9 @@ def object_tags(
     doc_llm: str,
     doc_md: str,
     keywords: list[str],
+    category: str,
 ) -> dict[str, str]:
-    """Build the four standard per-object discovery/description tags.
+    """Build the standard per-object discovery/description tags.
 
     Args:
         title: Human-friendly display name (VGI124); must add a word over the
@@ -39,6 +40,9 @@ def object_tags(
             ``doc_llm``.
         keywords: Search terms / synonyms (VGI126), serialized as a JSON array
             of strings (VGI138).
+        category: The primary ``vgi.category`` (VGI409/VGI411) — one of the
+            names declared in the schema's ``vgi.categories`` registry
+            (``options`` | ``bonds`` | ``conventions``).
 
     Returns:
         A tag dict suitable for spreading into a function's ``Meta.tags``.
@@ -48,4 +52,5 @@ def object_tags(
         "vgi.doc_llm": doc_llm,
         "vgi.doc_md": doc_md,
         "vgi.keywords": json.dumps(keywords),
+        "vgi.category": category,
     }

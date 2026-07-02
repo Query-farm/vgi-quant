@@ -1,0 +1,11 @@
+# vgi-lint-check configuration for the quant worker.
+#
+# The executable examples exercise QuantLib-backed scalar functions. Each
+# example runs against a freshly spawned worker (`uv run quant_worker.py`), so
+# its wall-clock time is dominated by process cold-start: the `uv` environment
+# resolution plus QuantLib's one-time C++ import (a heavy wheel). The pure math
+# itself is microseconds. That cold-start cost is expected and unavoidable for a
+# QuantLib worker, so raise the slow-example threshold above it rather than
+# flagging every example as "slow" (VGI908).
+[execution]
+slow_seconds = 30

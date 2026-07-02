@@ -1,7 +1,7 @@
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
-#     "vgi-python[http]>=0.8.5",
+#     "vgi-python[http]>=0.9.0",
 #     "QuantLib>=1.42",
 #     "pyarrow",
 # ]
@@ -63,43 +63,35 @@ _CATALOG_DESCRIPTION_MD = (
     "round-trips to Python. The `quant` catalog turns industry-standard quantitative-finance "
     "calculations into ordinary SQL functions you can call inline in any query.\n\n"
     "This extension is for analysts, quants, risk teams, and data engineers who keep their market "
-    "data in DuckDB and want option pricing, implied volatility, bond analytics, and yield/duration "
-    "math to live right next to the data. Because every calculation is exposed as a scalar function, "
-    "you can price a whole portfolio in a single `SELECT`, filter on a computed Greek in a `WHERE` "
-    "clause, or join model output back onto your positions — all with the speed of DuckDB's "
+    "data in DuckDB and want option pricing, implied volatility, bond analytics, and rate-risk math "
+    "to live right next to the data. Because the calculations are exposed as scalar functions, you "
+    "can value a whole portfolio in a single `SELECT`, filter on a computed risk measure in a "
+    "`WHERE` clause, or join model output back onto your positions — all with the speed of DuckDB's "
     "vectorized engine over Apache Arrow.\n\n"
+    "## Key concepts\n\n"
+    "- **Per-row vs. constant arguments.** Market inputs (spot, strike, rate, volatility, price, "
+    "coupon, yield, dates) are per-row columns, while the option kind, the bond coupon frequency, "
+    "and the day-count convention are constant (literal) arguments fixed at planning time. That "
+    "split lets you value an entire table of positions in one pass.\n"
+    "- **Analytic and deterministic.** Option values use the closed-form Black-Scholes model (no "
+    "dividend yield — carry equals the risk-free rate); bond analytics use a fixed-rate bond priced "
+    "on a pinned evaluation date. Results are reproducible run to run.\n"
+    "- **NULL vs. error.** Any NULL input yields a NULL result, but a genuinely invalid non-NULL "
+    "input (a non-positive time to maturity, a negative volatility, an unknown convention) raises a "
+    "clear error rather than silently returning a wrong number.\n\n"
+    "## When to reach for it\n\n"
+    "Use `quant` whenever you need theoretical option premia and their risk sensitivities, want to "
+    "convert between bond prices and yields or measure interest-rate risk, or need consistent "
+    "day-count and present-value math alongside your data — without exporting to a separate "
+    "analytics stack. List the schema to discover the exact functions and their signatures.\n\n"
+    "## Backed by QuantLib\n\n"
     "Under the hood the math is backed by [QuantLib](https://www.quantlib.org/), the widely used "
-    "open-source library for quantitative finance. QuantLib provides the analytic Black-Scholes "
-    "option pricing, the fixed-rate bond pricing and yield solvers, and the day-count conventions "
-    "this worker exposes. See the QuantLib "
-    "[source code on GitHub](https://github.com/lballabio/QuantLib), the "
+    "open-source library for quantitative finance, which provides the analytic option pricing, the "
+    "fixed-rate bond pricing and yield solvers, and the day-count conventions this worker exposes. "
+    "See the QuantLib [source code on GitHub](https://github.com/lballabio/QuantLib), the "
     "[official documentation](https://www.quantlib.org/docs.shtml), and the "
     "[Python bindings reference](https://quantlib-python-docs.readthedocs.io/) for the underlying "
-    "models and conventions.\n\n"
-    "## What you can compute\n\n"
-    "**Option pricing & Greeks (Black-Scholes analytic):** `bs_price`, `bs_delta`, `bs_gamma`, "
-    "`bs_vega`, `bs_theta`, `bs_rho`, and `implied_vol` to invert a market price back to volatility. "
-    "Each option scalar takes `(spot, strike, rate, vol, ttm)` per-row columns plus a constant "
-    "`opt_type` of `'call'` or `'put'`.\n\n"
-    "**Fixed-rate bond analytics:** `bond_price` (clean price from a yield), `bond_yield` (yield to "
-    "maturity solved from a price), `bond_duration` (modified duration), and `bond_convexity`. Bond "
-    "scalars take a constant coupon `freq` of 1, 2, 4, or 12 payments per year.\n\n"
-    "**Day-count & discounting:** `year_fraction` between two dates under a chosen `convention` "
-    "(`'ACT/360'`, `'ACT/365'`, `'30/360'`, `'ACT/ACT'`), plus continuously-compounded "
-    "`discount_factor` and `present_value`. The `day_count_conventions()` table function lists every "
-    "supported convention string.\n\n"
-    "## Example queries\n\n"
-    "```sql\n"
-    "SELECT quant.bs_price(100, 100, 0.05, 0.2, 1, 'call');        -- ~10.45\n"
-    "SELECT quant.bs_delta(100, 100, 0.05, 0.2, 1, 'call');        -- ~0.637\n"
-    "SELECT quant.implied_vol(10.45, 100, 100, 0.05, 1, 'call');   -- ~0.20\n"
-    "SELECT quant.bond_yield(100, 100, 0.05, 10, 2);               -- ~0.05\n"
-    "SELECT quant.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360');\n"
-    "SELECT * FROM quant.day_count_conventions() ORDER BY name;\n"
-    "```\n\n"
-    "Option and bond inputs are per-row columns, while `opt_type`, bond `freq`, and the day-count "
-    "`convention` are constant (literal) arguments — so you can price an entire table of positions "
-    "in one pass."
+    "models and conventions."
 )
 
 _SCHEMA_DESCRIPTION_LLM = (
@@ -109,15 +101,22 @@ _SCHEMA_DESCRIPTION_LLM = (
 )
 
 _SCHEMA_DESCRIPTION_MD = (
-    "The single schema of the `quant` catalog, grouping every quantitative-finance "
-    "function over Apache Arrow. It contains the Black-Scholes option scalars "
-    "(`bs_price` plus the `bs_delta`/`bs_gamma`/`bs_vega`/`bs_theta`/`bs_rho` Greeks "
-    "and `implied_vol`), the fixed-rate bond scalars (`bond_price`, `bond_yield`, "
-    "`bond_duration`, `bond_convexity`), the day-count and continuous-discounting "
-    "scalars (`year_fraction`, `discount_factor`, `present_value`), and the "
-    "`day_count_conventions` reference table/function listing the accepted "
-    "day-count convention strings. Use it for option pricing and Greeks, bond "
-    "analytics, yield/duration, and day-count or present-value math directly in SQL."
+    "# Quant — the `main` schema\n\n"
+    "The single schema of the `quant` catalog. It groups every quantitative-finance "
+    "calculation the worker exposes over Apache Arrow into one namespace.\n\n"
+    "## What lives here\n\n"
+    "Three families of functionality:\n\n"
+    "- **Options** — closed-form Black-Scholes pricing and the full set of first- and "
+    "second-order Greeks, plus inversion of a market price back to implied volatility.\n"
+    "- **Fixed-rate bonds** — clean pricing from a yield, the inverse yield-to-maturity "
+    "solve, and interest-rate risk measures (modified duration and convexity).\n"
+    "- **Day-count & discounting** — year fractions under the common day-count "
+    "conventions and continuously-compounded discount factors and present values, "
+    "with a discovery listing of the accepted convention strings.\n\n"
+    "## When to use it\n\n"
+    "Use this schema for option pricing and risk sensitivities, bond price/yield "
+    "conversion and rate-risk analytics, and day-count or present-value math directly "
+    "in SQL. List the schema's objects to see the exact functions and their signatures."
 )
 
 _SCHEMA_EXAMPLE_QUERIES = (
@@ -129,6 +128,126 @@ _SCHEMA_EXAMPLE_QUERIES = (
     "SELECT quant.main.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360');\n"
     "SELECT quant.main.discount_factor(0.05, 1);\n"
     "SELECT * FROM quant.main.day_count_conventions() ORDER BY name;"
+)
+
+# VGI413/VGI409/VGI410: the schema's category registry. Every function/table
+# carries a `vgi.category` (via `object_tags`) naming one of these; the three
+# names mirror the worker's natural groupings (options / bonds / conventions).
+_SCHEMA_CATEGORIES = json.dumps(
+    [
+        {
+            "name": "options",
+            "description": (
+                "Black-Scholes European option pricing, the option Greeks "
+                "(delta, gamma, vega, theta, rho), and implied volatility."
+            ),
+        },
+        {
+            "name": "bonds",
+            "description": (
+                "Fixed-rate bond pricing, yield to maturity, and interest-rate "
+                "risk measures (modified duration and convexity)."
+            ),
+        },
+        {
+            "name": "conventions",
+            "description": ("Day-count year fractions and continuously-compounded discounting and present-value math."),
+        },
+    ]
+)
+
+# VGI152/VGI920: the fixed analyst-task suite `vgi-lint simulate` grades the
+# worker against. Each task is unambiguous and its `reference_sql` is the
+# canonical single-function solution; grading ignores output column names
+# (the analyst picks its own alias) but is strict on values (QuantLib results
+# are deterministic, so the analyst calling the same function matches exactly).
+_AGENT_TEST_TASKS = json.dumps(
+    [
+        {
+            "name": "atm_call_price",
+            "prompt": (
+                "Price a 1-year at-the-money European call option using the quant worker: "
+                "spot price 100, strike 100, continuously-compounded risk-free rate 0.05, "
+                "annualized volatility 0.20. Return the option price rounded to 4 decimal places."
+            ),
+            "reference_sql": "SELECT ROUND(quant.bs_price(100, 100, 0.05, 0.2, 1, 'call'), 4) AS price",
+            "success_criteria": "Returns the Black-Scholes call price, approximately 10.4506.",
+            "ignore_column_names": True,
+        },
+        {
+            "name": "call_delta",
+            "prompt": (
+                "What is the Black-Scholes delta of a 1-year at-the-money European call "
+                "(spot 100, strike 100, rate 0.05, volatility 0.20)? Round to 4 decimal places."
+            ),
+            "reference_sql": "SELECT ROUND(quant.bs_delta(100, 100, 0.05, 0.2, 1, 'call'), 4) AS delta",
+            "success_criteria": "Returns the call delta, approximately 0.6368.",
+            "ignore_column_names": True,
+        },
+        {
+            "name": "implied_vol_from_price",
+            "prompt": (
+                "A European call option with spot 100, strike 100, risk-free rate 0.05, and "
+                "1 year to maturity trades at a price of 10.4506. What annualized implied "
+                "volatility does that price imply? Round to 2 decimal places."
+            ),
+            "reference_sql": "SELECT ROUND(quant.implied_vol(10.4506, 100, 100, 0.05, 1, 'call'), 2) AS iv",
+            "success_criteria": "Recovers an implied volatility of about 0.20.",
+            "ignore_column_names": True,
+        },
+        {
+            "name": "par_bond_yield",
+            "prompt": (
+                "A fixed-rate bond with face value 100, a 5% annual coupon paid semiannually, "
+                "and 10 years to maturity is quoted at a clean price of 100. What is its yield "
+                "to maturity? Round to 4 decimal places."
+            ),
+            "reference_sql": "SELECT ROUND(quant.bond_yield(100, 100, 0.05, 10, 2), 4) AS ytm",
+            "success_criteria": "Returns the yield to maturity of a par bond, about 0.05.",
+            "ignore_column_names": True,
+        },
+        {
+            "name": "bond_modified_duration",
+            "prompt": (
+                "Compute the modified duration of a fixed-rate bond with face value 100, a 5% "
+                "annual coupon paid semiannually, a 5% yield to maturity, and 10 years to "
+                "maturity. Round to 2 decimal places."
+            ),
+            "reference_sql": "SELECT ROUND(quant.bond_duration(100, 0.05, 0.05, 10, 2), 2) AS modified_duration",
+            "success_criteria": "Returns the modified duration in years, roughly 7.8.",
+            "ignore_column_names": True,
+        },
+        {
+            "name": "act360_year_fraction",
+            "prompt": (
+                "What is the ACT/360 day-count year fraction between 2026-01-01 and "
+                "2026-07-01? Round to 4 decimal places."
+            ),
+            "reference_sql": (
+                "SELECT ROUND(quant.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360'), 4) AS yf"
+            ),
+            "success_criteria": "Returns 181/360, approximately 0.5028.",
+            "ignore_column_names": True,
+        },
+        {
+            "name": "discount_factor_2y",
+            "prompt": (
+                "Compute the continuously-compounded discount factor for a rate of 0.05 over "
+                "2 years. Round to 6 decimal places."
+            ),
+            "reference_sql": "SELECT ROUND(quant.discount_factor(0.05, 2), 6) AS df",
+            "success_criteria": "Returns exp(-0.10), approximately 0.904837.",
+            "ignore_column_names": True,
+        },
+        {
+            "name": "list_day_count_conventions",
+            "prompt": "List every day-count convention string this worker supports.",
+            "reference_sql": "SELECT name FROM quant.day_count_conventions() ORDER BY name",
+            "success_criteria": "Lists the supported day-count conventions (ACT/360, ACT/365, 30/360, ACT/ACT).",
+            "ignore_column_names": True,
+            "unordered": True,
+        },
+    ]
 )
 
 _QUANT_CATALOG = Catalog(
@@ -157,6 +276,7 @@ _QUANT_CATALOG = Catalog(
         ),
         "vgi.doc_llm": _CATALOG_DESCRIPTION_LLM,
         "vgi.doc_md": _CATALOG_DESCRIPTION_MD,
+        "vgi.agent_test_tasks": _AGENT_TEST_TASKS,
         "vgi.author": "Query.Farm",
         "vgi.copyright": "Copyright 2026 Query Farm LLC - https://query.farm",
         "vgi.license": "MIT",
@@ -192,6 +312,7 @@ _QUANT_CATALOG = Catalog(
                 "topic": "option-and-bond-pricing",
                 "vgi.doc_llm": _SCHEMA_DESCRIPTION_LLM,
                 "vgi.doc_md": _SCHEMA_DESCRIPTION_MD,
+                "vgi.categories": _SCHEMA_CATEGORIES,
                 "vgi.example_queries": _SCHEMA_EXAMPLE_QUERIES,
             },
             functions=list(_FUNCTIONS),

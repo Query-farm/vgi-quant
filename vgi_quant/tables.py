@@ -62,6 +62,7 @@ class DayCountConventionsFunction(TableFunctionGenerator[_NoArgs]):
         categories = ["quant", "conventions"]
         tags = {
             **object_tags(
+                category="conventions",
                 title="Day-Count Conventions Catalog",
                 doc_llm=(
                     "## day_count_conventions\n\n"
@@ -152,18 +153,22 @@ DAY_COUNT_CONVENTIONS_TABLE = Table(
     primary_key=(("name",),),
     tags={
         **object_tags(
+            category="conventions",
             title="Day-Count Conventions Reference Table",
             doc_llm=(
                 "## day_count_conventions (table)\n\n"
                 "A reference **table** of every day-count convention string "
                 "accepted by `year_fraction`, one per row, with a single `name` "
                 "column.\n\n"
-                "Query it as `SELECT * FROM quant.day_count_conventions` (no "
-                "parentheses) to discover the valid `convention` literals before "
-                "calling `quant.year_fraction(start, end, convention)`. Each "
-                "`name` (e.g. `ACT/360`, `30/360`) is a value you can pass "
-                "directly as that trailing argument. The identical rows are also "
-                "reachable via the `day_count_conventions()` table function."
+                "Scan it (no parentheses) to discover the valid `convention` "
+                "literals before calling `year_fraction`:\n\n"
+                "```sql\n"
+                "SELECT * FROM quant.day_count_conventions ORDER BY name;\n"
+                "```\n\n"
+                "Each `name` (e.g. `ACT/360`, `30/360`) is a value you can pass "
+                "directly as the trailing `convention` argument. The identical "
+                "rows are also reachable via the `day_count_conventions` table "
+                "function."
             ),
             doc_md=(
                 "# Day-Count Conventions Reference Table\n\n"

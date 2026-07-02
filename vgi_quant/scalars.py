@@ -137,6 +137,7 @@ def _make_option_scalar(
         doc_llm=doc_llm,
         doc_md=doc_md,
         keywords=keywords,
+        category="options",
     )
 
     class _OptionScalar(ScalarFunction):
@@ -410,6 +411,7 @@ class ImpliedVolFunction(ScalarFunction):
         description = "Black-Scholes implied volatility reproducing an option price (raises if not invertible)"
         categories = ["quant", "options"]
         tags = object_tags(
+            category="options",
             title="Black-Scholes Implied Volatility",
             doc_llm=(
                 "## implied_vol\n\n"
@@ -491,6 +493,7 @@ class BondPriceFunction(ScalarFunction):
         description = "Clean price of a fixed-rate bond at a given yield (par bond prices to face)"
         categories = ["quant", "bonds"]
         tags = object_tags(
+            category="bonds",
             title="Fixed-Rate Bond Price",
             doc_llm=(
                 "## bond_price\n\n"
@@ -560,6 +563,7 @@ class BondYieldFunction(ScalarFunction):
         description = "Yield to maturity implied by a clean bond price (inverse of bond_price)"
         categories = ["quant", "bonds"]
         tags = object_tags(
+            category="bonds",
             title="Fixed-Rate Bond Yield",
             doc_llm=(
                 "## bond_yield\n\n"
@@ -629,6 +633,7 @@ class BondDurationFunction(ScalarFunction):
         description = "Modified duration of a fixed-rate bond at a given yield"
         categories = ["quant", "bonds"]
         tags = object_tags(
+            category="bonds",
             title="Fixed-Rate Bond Modified Duration",
             doc_llm=(
                 "## bond_duration\n\n"
@@ -697,6 +702,7 @@ class BondConvexityFunction(ScalarFunction):
         description = "Convexity of a fixed-rate bond at a given yield"
         categories = ["quant", "bonds"]
         tags = object_tags(
+            category="bonds",
             title="Fixed-Rate Bond Convexity",
             doc_llm=(
                 "## bond_convexity\n\n"
@@ -774,6 +780,7 @@ class YearFractionFunction(ScalarFunction):
         categories = ["quant", "conventions"]
         tags = {
             **object_tags(
+                category="conventions",
                 title="Day-Count Year Fraction",
                 doc_llm=(
                     "## year_fraction\n\n"
@@ -843,6 +850,7 @@ class DiscountFactorFunction(ScalarFunction):
         description = "Continuously-compounded discount factor exp(-rate * ttm)"
         categories = ["quant", "conventions"]
         tags = object_tags(
+            category="conventions",
             title="Continuous Discount Factor",
             doc_llm=(
                 "## discount_factor\n\n"
@@ -887,7 +895,7 @@ class DiscountFactorFunction(ScalarFunction):
     def compute(
         cls,
         rate: Annotated[pa.DoubleArray, _RATE],
-        ttm: Annotated[pa.DoubleArray, Param(_F64, doc="Time horizon in years.")],
+        ttm: Annotated[pa.DoubleArray, Param(_F64, doc="Discounting horizon, expressed in years.")],
     ) -> Annotated[pa.DoubleArray, Returns(_F64)]:
         """Map each input row to its output value."""
         return _map_floats([rate, ttm], quant.discount_factor)
@@ -903,6 +911,7 @@ class PresentValueFunction(ScalarFunction):
         description = "Present value amount * exp(-rate * ttm) (continuous compounding)"
         categories = ["quant", "conventions"]
         tags = object_tags(
+            category="conventions",
             title="Continuous Present Value",
             doc_llm=(
                 "## present_value\n\n"
@@ -946,7 +955,7 @@ class PresentValueFunction(ScalarFunction):
         cls,
         amount: Annotated[pa.DoubleArray, Param(_F64, doc="Future cash amount.")],
         rate: Annotated[pa.DoubleArray, _RATE],
-        ttm: Annotated[pa.DoubleArray, Param(_F64, doc="Time horizon in years.")],
+        ttm: Annotated[pa.DoubleArray, Param(_F64, doc="Discounting horizon, expressed in years.")],
     ) -> Annotated[pa.DoubleArray, Returns(_F64)]:
         """Map each input row to its output value."""
         return _map_floats([amount, rate, ttm], quant.present_value)
