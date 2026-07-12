@@ -49,15 +49,15 @@ _F64 = pa.float64()
 _YEAR_FRACTION_EXECUTABLE_EXAMPLES = (
     "["
     '{"description": "Black-Scholes price of an at-the-money 1y European call.",'
-    ' "sql": "SELECT quant.bs_price(100, 100, 0.05, 0.2, 1, \'call\') AS price"},'
+    ' "sql": "SELECT quant.main.bs_price(100, 100, 0.05, 0.2, 1, \'call\') AS price"},'
     '{"description": "Recover implied volatility from a Black-Scholes call price.",'
-    ' "sql": "SELECT quant.implied_vol(10.45, 100, 100, 0.05, 1, \'call\') AS iv"},'
+    ' "sql": "SELECT quant.main.implied_vol(10.45, 100, 100, 0.05, 1, \'call\') AS iv"},'
     '{"description": "Clean price of a 10y semiannual par bond.",'
-    ' "sql": "SELECT quant.bond_price(100, 0.05, 0.05, 10, 2) AS clean_price"},'
+    ' "sql": "SELECT quant.main.bond_price(100, 0.05, 0.05, 10, 2) AS clean_price"},'
     '{"description": "Year fraction of a half-year span under ACT/360.",'
-    " \"sql\": \"SELECT quant.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360') AS yf\"},"
+    " \"sql\": \"SELECT quant.main.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360') AS yf\"},"
     '{"description": "List the supported day-count conventions.",'
-    ' "sql": "SELECT name FROM quant.day_count_conventions() ORDER BY name"}'
+    ' "sql": "SELECT name FROM quant.main.day_count_conventions() ORDER BY name"}'
     "]"
 )
 
@@ -150,7 +150,7 @@ def _make_option_scalar(
             tags = fn_tags
             examples = [
                 FunctionExample(
-                    sql=f"SELECT quant.{fname}(100, 100, 0.05, 0.2, 1, 'call')",
+                    sql=f"SELECT quant.main.{fname}(100, 100, 0.05, 0.2, 1, 'call') AS value",
                     description=example_extra,
                 ),
             ]
@@ -450,7 +450,7 @@ class ImpliedVolFunction(ScalarFunction):
         )
         examples = [
             FunctionExample(
-                sql="SELECT quant.implied_vol(10.45, 100, 100, 0.05, 1, 'call')",
+                sql="SELECT quant.main.implied_vol(10.45, 100, 100, 0.05, 1, 'call') AS iv",
                 description="Recover ~0.20 vol from a BS call price",
             ),
         ]
@@ -480,7 +480,16 @@ _FACE = Param(_F64, doc="Face (par) value of the bond (> 0).")
 _COUPON = Param(_F64, doc="Annual coupon rate, e.g. 0.05 for 5%.")
 _YIELD = Param(_F64, doc="Annual yield to maturity, e.g. 0.05 for 5%.")
 _YEARS = Param(_F64, doc="Whole years to maturity (> 0).")
-_FREQ = ConstParam("Coupon frequency per year: 1, 2, 4, or 12.", arrow_type=int)
+# VGI317: `freq` accepts a genuinely closed set of coupon frequencies, so it
+# declares a machine-readable `choices` constraint (sourced from the pure layer's
+# own `_FREQUENCIES` map) — agents discover the valid literals via
+# vgi_function_arguments() instead of by trial-and-error, and metadata cannot
+# drift from behaviour.
+_FREQ = ConstParam(
+    "Coupon frequency per year (payments per year).",
+    arrow_type=int,
+    choices=sorted(quant._FREQUENCIES),
+)
 
 
 class BondPriceFunction(ScalarFunction):
@@ -532,7 +541,7 @@ class BondPriceFunction(ScalarFunction):
         )
         examples = [
             FunctionExample(
-                sql="SELECT quant.bond_price(100, 0.05, 0.05, 10, 2)",
+                sql="SELECT quant.main.bond_price(100, 0.05, 0.05, 10, 2) AS clean_price",
                 description="A par bond (coupon == yield) prices to 100",
             ),
         ]
@@ -602,7 +611,7 @@ class BondYieldFunction(ScalarFunction):
         )
         examples = [
             FunctionExample(
-                sql="SELECT quant.bond_yield(100, 100, 0.05, 10, 2)",
+                sql="SELECT quant.main.bond_yield(100, 100, 0.05, 10, 2) AS ytm",
                 description="A par-priced 5% bond yields ~0.05",
             ),
         ]
@@ -671,7 +680,7 @@ class BondDurationFunction(ScalarFunction):
         )
         examples = [
             FunctionExample(
-                sql="SELECT quant.bond_duration(100, 0.05, 0.05, 10, 2)",
+                sql="SELECT quant.main.bond_duration(100, 0.05, 0.05, 10, 2) AS modified_duration",
                 description="Modified duration of a 10y par bond",
             ),
         ]
@@ -740,7 +749,7 @@ class BondConvexityFunction(ScalarFunction):
         )
         examples = [
             FunctionExample(
-                sql="SELECT quant.bond_convexity(100, 0.05, 0.05, 10, 2)",
+                sql="SELECT quant.main.bond_convexity(100, 0.05, 0.05, 10, 2) AS convexity",
                 description="Convexity of a 10y par bond",
             ),
         ]
@@ -824,7 +833,7 @@ class YearFractionFunction(ScalarFunction):
         }
         examples = [
             FunctionExample(
-                sql="SELECT quant.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360')",
+                sql="SELECT quant.main.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360') AS yf",
                 description="Half-ish year under ACT/360 (181/360)",
             ),
         ]
@@ -886,7 +895,7 @@ class DiscountFactorFunction(ScalarFunction):
         )
         examples = [
             FunctionExample(
-                sql="SELECT quant.discount_factor(0.05, 1)",
+                sql="SELECT quant.main.discount_factor(0.05, 1) AS df",
                 description="One-year discount factor at 5%",
             ),
         ]
@@ -945,7 +954,7 @@ class PresentValueFunction(ScalarFunction):
         )
         examples = [
             FunctionExample(
-                sql="SELECT quant.present_value(100, 0.05, 1)",
+                sql="SELECT quant.main.present_value(100, 0.05, 1) AS pv",
                 description="Present value of 100 due in one year at 5%",
             ),
         ]

@@ -1,7 +1,11 @@
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
-#     "vgi-python[http]>=0.9.0",
+#     # Floored at 0.15.0: this worker exposes a browsable Table, and the
+#     # released signed vgi community extension now expects the 0.15.0
+#     # table-contents RPC schema (required_filters); 0.14.x fails ATTACH with an
+#     # out-of-date Arrow schema. Keep in sync with pyproject.toml.
+#     "vgi-python[http]>=0.15.0",
 #     "QuantLib>=1.42",
 #     "pyarrow",
 # ]
@@ -127,7 +131,7 @@ _SCHEMA_EXAMPLE_QUERIES = (
     "SELECT quant.main.bond_yield(100, 100, 0.05, 10, 2);\n"
     "SELECT quant.main.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360');\n"
     "SELECT quant.main.discount_factor(0.05, 1);\n"
-    "SELECT * FROM quant.main.day_count_conventions() ORDER BY name;"
+    "SELECT name FROM quant.main.day_count_conventions() ORDER BY name;"
 )
 
 # VGI413/VGI409/VGI410: the schema's category registry. Every function/table
@@ -170,7 +174,7 @@ _AGENT_TEST_TASKS = json.dumps(
                 "spot price 100, strike 100, continuously-compounded risk-free rate 0.05, "
                 "annualized volatility 0.20. Return the option price rounded to 4 decimal places."
             ),
-            "reference_sql": "SELECT ROUND(quant.bs_price(100, 100, 0.05, 0.2, 1, 'call'), 4) AS price",
+            "reference_sql": "SELECT ROUND(quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'call'), 4) AS price",
             "success_criteria": "Returns the Black-Scholes call price, approximately 10.4506.",
             "ignore_column_names": True,
         },
@@ -180,8 +184,50 @@ _AGENT_TEST_TASKS = json.dumps(
                 "What is the Black-Scholes delta of a 1-year at-the-money European call "
                 "(spot 100, strike 100, rate 0.05, volatility 0.20)? Round to 4 decimal places."
             ),
-            "reference_sql": "SELECT ROUND(quant.bs_delta(100, 100, 0.05, 0.2, 1, 'call'), 4) AS delta",
+            "reference_sql": "SELECT ROUND(quant.main.bs_delta(100, 100, 0.05, 0.2, 1, 'call'), 4) AS delta",
             "success_criteria": "Returns the call delta, approximately 0.6368.",
+            "ignore_column_names": True,
+        },
+        {
+            "name": "atm_call_gamma",
+            "prompt": (
+                "What is the Black-Scholes gamma of a 1-year at-the-money European call "
+                "(spot 100, strike 100, rate 0.05, volatility 0.20)? Round to 4 decimal places."
+            ),
+            "reference_sql": "SELECT ROUND(quant.main.bs_gamma(100, 100, 0.05, 0.2, 1, 'call'), 4) AS gamma",
+            "success_criteria": "Returns the call gamma, approximately 0.0188.",
+            "ignore_column_names": True,
+        },
+        {
+            "name": "atm_call_vega",
+            "prompt": (
+                "What is the Black-Scholes vega (per 1.00 of volatility) of a 1-year "
+                "at-the-money European call (spot 100, strike 100, rate 0.05, volatility 0.20)? "
+                "Round to 2 decimal places."
+            ),
+            "reference_sql": "SELECT ROUND(quant.main.bs_vega(100, 100, 0.05, 0.2, 1, 'call'), 2) AS vega",
+            "success_criteria": "Returns the call vega per 1.00 vol, approximately 37.52.",
+            "ignore_column_names": True,
+        },
+        {
+            "name": "atm_call_theta",
+            "prompt": (
+                "What is the Black-Scholes theta (per year) of a 1-year at-the-money European "
+                "call (spot 100, strike 100, rate 0.05, volatility 0.20)? Round to 2 decimal places."
+            ),
+            "reference_sql": "SELECT ROUND(quant.main.bs_theta(100, 100, 0.05, 0.2, 1, 'call'), 2) AS theta",
+            "success_criteria": "Returns the call theta per year, a negative value near -6.41.",
+            "ignore_column_names": True,
+        },
+        {
+            "name": "atm_call_rho",
+            "prompt": (
+                "What is the Black-Scholes rho (per 1.00 of the rate) of a 1-year at-the-money "
+                "European call (spot 100, strike 100, rate 0.05, volatility 0.20)? Round to 2 "
+                "decimal places."
+            ),
+            "reference_sql": "SELECT ROUND(quant.main.bs_rho(100, 100, 0.05, 0.2, 1, 'call'), 2) AS rho",
+            "success_criteria": "Returns the call rho per 1.00 rate, approximately 53.23.",
             "ignore_column_names": True,
         },
         {
@@ -191,8 +237,19 @@ _AGENT_TEST_TASKS = json.dumps(
                 "1 year to maturity trades at a price of 10.4506. What annualized implied "
                 "volatility does that price imply? Round to 2 decimal places."
             ),
-            "reference_sql": "SELECT ROUND(quant.implied_vol(10.4506, 100, 100, 0.05, 1, 'call'), 2) AS iv",
+            "reference_sql": "SELECT ROUND(quant.main.implied_vol(10.4506, 100, 100, 0.05, 1, 'call'), 2) AS iv",
             "success_criteria": "Recovers an implied volatility of about 0.20.",
+            "ignore_column_names": True,
+        },
+        {
+            "name": "par_bond_price",
+            "prompt": (
+                "Compute the clean price of a fixed-rate bond with face value 100, a 5% annual "
+                "coupon paid semiannually, a 5% yield to maturity, and 10 years to maturity. "
+                "Round to 2 decimal places."
+            ),
+            "reference_sql": "SELECT ROUND(quant.main.bond_price(100, 0.05, 0.05, 10, 2), 2) AS clean_price",
+            "success_criteria": "Returns the clean price of a par bond, 100.00.",
             "ignore_column_names": True,
         },
         {
@@ -202,7 +259,7 @@ _AGENT_TEST_TASKS = json.dumps(
                 "and 10 years to maturity is quoted at a clean price of 100. What is its yield "
                 "to maturity? Round to 4 decimal places."
             ),
-            "reference_sql": "SELECT ROUND(quant.bond_yield(100, 100, 0.05, 10, 2), 4) AS ytm",
+            "reference_sql": "SELECT ROUND(quant.main.bond_yield(100, 100, 0.05, 10, 2), 4) AS ytm",
             "success_criteria": "Returns the yield to maturity of a par bond, about 0.05.",
             "ignore_column_names": True,
         },
@@ -213,8 +270,19 @@ _AGENT_TEST_TASKS = json.dumps(
                 "annual coupon paid semiannually, a 5% yield to maturity, and 10 years to "
                 "maturity. Round to 2 decimal places."
             ),
-            "reference_sql": "SELECT ROUND(quant.bond_duration(100, 0.05, 0.05, 10, 2), 2) AS modified_duration",
+            "reference_sql": "SELECT ROUND(quant.main.bond_duration(100, 0.05, 0.05, 10, 2), 2) AS modified_duration",
             "success_criteria": "Returns the modified duration in years, roughly 7.8.",
+            "ignore_column_names": True,
+        },
+        {
+            "name": "bond_convexity",
+            "prompt": (
+                "Compute the convexity of a fixed-rate bond with face value 100, a 5% annual "
+                "coupon paid semiannually, a 5% yield to maturity, and 10 years to maturity. "
+                "Round to 2 decimal places."
+            ),
+            "reference_sql": "SELECT ROUND(quant.main.bond_convexity(100, 0.05, 0.05, 10, 2), 2) AS convexity",
+            "success_criteria": "Returns the bond convexity, approximately 73.65.",
             "ignore_column_names": True,
         },
         {
@@ -224,7 +292,7 @@ _AGENT_TEST_TASKS = json.dumps(
                 "2026-07-01? Round to 4 decimal places."
             ),
             "reference_sql": (
-                "SELECT ROUND(quant.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360'), 4) AS yf"
+                "SELECT ROUND(quant.main.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360'), 4) AS yf"
             ),
             "success_criteria": "Returns 181/360, approximately 0.5028.",
             "ignore_column_names": True,
@@ -235,14 +303,24 @@ _AGENT_TEST_TASKS = json.dumps(
                 "Compute the continuously-compounded discount factor for a rate of 0.05 over "
                 "2 years. Round to 6 decimal places."
             ),
-            "reference_sql": "SELECT ROUND(quant.discount_factor(0.05, 2), 6) AS df",
+            "reference_sql": "SELECT ROUND(quant.main.discount_factor(0.05, 2), 6) AS df",
             "success_criteria": "Returns exp(-0.10), approximately 0.904837.",
+            "ignore_column_names": True,
+        },
+        {
+            "name": "present_value_2y",
+            "prompt": (
+                "What is the present value today of 1000 units of currency received in 2 years, "
+                "discounted continuously at an annual rate of 0.05? Round to 4 decimal places."
+            ),
+            "reference_sql": "SELECT ROUND(quant.main.present_value(1000, 0.05, 2), 4) AS pv",
+            "success_criteria": "Returns 1000 * exp(-0.10), approximately 904.8374.",
             "ignore_column_names": True,
         },
         {
             "name": "list_day_count_conventions",
             "prompt": "List every day-count convention string this worker supports.",
-            "reference_sql": "SELECT name FROM quant.day_count_conventions() ORDER BY name",
+            "reference_sql": "SELECT name FROM quant.main.day_count_conventions() ORDER BY name",
             "success_criteria": "Lists the supported day-count conventions (ACT/360, ACT/365, 30/360, ACT/ACT).",
             "ignore_column_names": True,
             "unordered": True,

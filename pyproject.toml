@@ -34,7 +34,14 @@ classifiers = [
 ]
 requires-python = ">=3.13"
 dependencies = [
-    "vgi-python>=0.9.0",
+    # Floored at 0.15.0: this worker exposes a browsable Table
+    # (day_count_conventions), which is listed over the table-contents RPC.
+    # vgi-python 0.15.0 renamed that RPC field (required_field_filter_paths ->
+    # required_filters) and the released signed vgi community extension now
+    # expects the new name — ATTACH against 0.14.x hard-fails with an
+    # out-of-date Apache Arrow schema. 0.15.0 is required for the extension to
+    # attach.
+    "vgi-python>=0.15.0",
     "QuantLib>=1.42",
     "pyarrow",
 ]
@@ -44,7 +51,9 @@ dependencies = [
 # addition to stdio. That path needs vgi-python's `http` extra (waitress).
 # CI's http transport leg installs this via `uv sync --extra http`.
 http = [
-    "vgi-python[http]>=0.9.0",
+    # Kept in lockstep with the base dependency floor above (browsable-Table
+    # table-contents RPC schema requires vgi-python >= 0.15.0).
+    "vgi-python[http]>=0.15.0",
 ]
 dev = [
     "pytest>=8",
