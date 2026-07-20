@@ -22,6 +22,27 @@ from __future__ import annotations
 import json
 
 
+def example_queries(examples: list[tuple[str, str]]) -> str:
+    """Serialize ``(description, sql)`` pairs into a ``vgi.example_queries`` value.
+
+    VGI515 requires every schema- and function-level example to carry a
+    non-empty description. The signed ``vgi`` community extension surfaces a
+    function's native ``Meta.examples`` as a bare ``VARCHAR[]`` of SQL strings —
+    the per-example descriptions are dropped on the wire — so described examples
+    must travel in the ``vgi.example_queries`` tag instead, which is a JSON list
+    of ``{"description", "sql"}`` objects.
+
+    Args:
+        examples: A list of ``(description, sql)`` pairs. Each ``description``
+            must be non-empty and each ``sql`` a self-contained, catalog-
+            qualified, re-runnable query.
+
+    Returns:
+        The JSON string to store under the ``vgi.example_queries`` tag.
+    """
+    return json.dumps([{"description": d, "sql": s} for d, s in examples])
+
+
 def object_tags(
     *,
     title: str,
@@ -29,6 +50,7 @@ def object_tags(
     doc_md: str,
     keywords: list[str],
     category: str,
+    examples: list[tuple[str, str]] | None = None,
 ) -> dict[str, str]:
     """Build the standard per-object discovery/description tags.
 
@@ -43,14 +65,20 @@ def object_tags(
         category: The primary ``vgi.category`` (VGI409/VGI411) — one of the
             names declared in the schema's ``vgi.categories`` registry
             (``options`` | ``bonds`` | ``conventions``).
+        examples: Optional ``(description, sql)`` pairs surfaced as a described
+            ``vgi.example_queries`` tag (VGI515). Prefer this over the native
+            ``Meta.examples`` carrier, whose descriptions the extension drops.
 
     Returns:
         A tag dict suitable for spreading into a function's ``Meta.tags``.
     """
-    return {
+    tags = {
         "vgi.title": title,
         "vgi.doc_llm": doc_llm,
         "vgi.doc_md": doc_md,
         "vgi.keywords": json.dumps(keywords),
         "vgi.category": category,
     }
+    if examples:
+        tags["vgi.example_queries"] = example_queries(examples)
+    return tags

@@ -1,11 +1,11 @@
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
-#     # Floored at 0.15.0: this worker exposes a browsable Table, and the
-#     # released signed vgi community extension now expects the 0.15.0
+#     # Floored at 0.16.0: this worker exposes a browsable Table, and the
+#     # released signed vgi community extension expects the current
 #     # table-contents RPC schema (required_filters); 0.14.x fails ATTACH with an
 #     # out-of-date Arrow schema. Keep in sync with pyproject.toml.
-#     "vgi-python[http]>=0.15.0",
+#     "vgi-python[http]>=0.16.0",
 #     "QuantLib>=1.42",
 #     "pyarrow",
 # ]
@@ -87,7 +87,8 @@ _CATALOG_DESCRIPTION_MD = (
     "Use `quant` whenever you need theoretical option premia and their risk sensitivities, want to "
     "convert between bond prices and yields or measure interest-rate risk, or need consistent "
     "day-count and present-value math alongside your data — without exporting to a separate "
-    "analytics stack. List the schema to discover the exact functions and their signatures.\n\n"
+    "analytics stack. Because every calculation is a deterministic, closed-form function, results "
+    "are reproducible and cheap enough to run across a whole portfolio in a single query.\n\n"
     "## Backed by QuantLib\n\n"
     "Under the hood the math is backed by [QuantLib](https://www.quantlib.org/), the widely used "
     "open-source library for quantitative finance, which provides the analytic option pricing, the "
@@ -120,18 +121,47 @@ _SCHEMA_DESCRIPTION_MD = (
     "## When to use it\n\n"
     "Use this schema for option pricing and risk sensitivities, bond price/yield "
     "conversion and rate-risk analytics, and day-count or present-value math directly "
-    "in SQL. List the schema's objects to see the exact functions and their signatures."
+    "in SQL. Every object is a deterministic scalar (or the one discovery table), so the "
+    "math composes inline in projections, `WHERE` filters, and joins over your positions."
 )
 
-_SCHEMA_EXAMPLE_QUERIES = (
-    "SELECT quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'call');\n"
-    "SELECT quant.main.bs_delta(100, 100, 0.05, 0.2, 1, 'call');\n"
-    "SELECT quant.main.implied_vol(10.45, 100, 100, 0.05, 1, 'call');\n"
-    "SELECT quant.main.bond_price(100, 0.05, 0.05, 10, 2);\n"
-    "SELECT quant.main.bond_yield(100, 100, 0.05, 10, 2);\n"
-    "SELECT quant.main.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360');\n"
-    "SELECT quant.main.discount_factor(0.05, 1);\n"
-    "SELECT name FROM quant.main.day_count_conventions() ORDER BY name;"
+# VGI515: schema-level examples must each carry a non-empty description, so this
+# is a JSON list of {"description", "sql"} objects (not a bare SQL string).
+_SCHEMA_EXAMPLE_QUERIES = json.dumps(
+    [
+        {
+            "description": "Black-Scholes fair value of an at-the-money 1-year European call.",
+            "sql": "SELECT quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'call') AS call_price",
+        },
+        {
+            "description": "Delta (hedge ratio) of that same at-the-money call.",
+            "sql": "SELECT quant.main.bs_delta(100, 100, 0.05, 0.2, 1, 'call') AS delta",
+        },
+        {
+            "description": "Recover the implied volatility (~0.20) from a quoted call price.",
+            "sql": "SELECT quant.main.implied_vol(10.45, 100, 100, 0.05, 1, 'call') AS iv",
+        },
+        {
+            "description": "Clean price of a 10-year 5% semiannual par bond (prices to 100).",
+            "sql": "SELECT quant.main.bond_price(100, 0.05, 0.05, 10, 2) AS clean_price",
+        },
+        {
+            "description": "Invert a par price back to the bond's yield to maturity (~0.05).",
+            "sql": "SELECT quant.main.bond_yield(100, 100, 0.05, 10, 2) AS ytm",
+        },
+        {
+            "description": "Day-count year fraction of a half-year span under ACT/360 (181/360).",
+            "sql": "SELECT quant.main.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360') AS yf",
+        },
+        {
+            "description": "One-year continuously-compounded discount factor at 5% (~0.9512).",
+            "sql": "SELECT quant.main.discount_factor(0.05, 1) AS df",
+        },
+        {
+            "description": "List the supported day-count convention names, alphabetically.",
+            "sql": "SELECT name FROM quant.main.day_count_conventions() ORDER BY name",
+        },
+    ]
 )
 
 # VGI413/VGI409/VGI410: the schema's category registry. Every function/table

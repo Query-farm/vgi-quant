@@ -17,7 +17,6 @@ from typing import ClassVar
 
 import pyarrow as pa
 from vgi.catalog import Table
-from vgi.metadata import FunctionExample
 from vgi.table_function import (
     BindParams,
     ProcessParams,
@@ -101,6 +100,16 @@ class DayCountConventionsFunction(TableFunctionGenerator[_NoArgs]):
                     "year fraction",
                     "day_count_conventions",
                 ],
+                examples=[
+                    (
+                        "List every supported day-count convention name, alphabetically.",
+                        "SELECT name FROM quant.main.day_count_conventions() ORDER BY name",
+                    ),
+                    (
+                        "Count how many day-count conventions the worker supports.",
+                        "SELECT count(*) AS n FROM quant.main.day_count_conventions()",
+                    ),
+                ],
             ),
             # VGI414: the retired free-form vgi.result_columns_md is migrated to
             # the structured vgi.result_columns_schema (JSON array of
@@ -119,16 +128,6 @@ class DayCountConventionsFunction(TableFunctionGenerator[_NoArgs]):
                 ]
             ),
         }
-        examples = [
-            FunctionExample(
-                sql="SELECT count(*) AS n FROM quant.main.day_count_conventions()",
-                description="How many day-count conventions are supported",
-            ),
-            FunctionExample(
-                sql="SELECT name FROM quant.main.day_count_conventions() ORDER BY name",
-                description="List the supported day-count convention names",
-            ),
-        ]
 
     @classmethod
     def cardinality(cls, params: BindParams[_NoArgs]) -> TableCardinality:

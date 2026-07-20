@@ -34,7 +34,6 @@ from typing import Annotated
 
 import pyarrow as pa
 from vgi.arguments import ConstParam, Param, Returns
-from vgi.metadata import FunctionExample
 from vgi.scalar_function import ScalarFunction
 
 from . import quant
@@ -110,7 +109,7 @@ _OPT_TYPE = ConstParam("Option type: 'call' or 'put'.")
 def _make_option_scalar(
     fname: str,
     summary: str,
-    example_extra: str,
+    examples: list[tuple[str, str]],
     *,
     title: str,
     doc_llm: str,
@@ -122,7 +121,8 @@ def _make_option_scalar(
     Args:
         fname: SQL function name, e.g. ``"bs_price"``.
         summary: One-line description for the function.
-        example_extra: Description text for the bundled example query.
+        examples: Described ``(description, sql)`` example pairs surfaced via the
+            ``vgi.example_queries`` tag (VGI515).
         title: Human-friendly display name (VGI124).
         doc_llm: Markdown narrative for an LLM/agent audience (VGI112).
         doc_md: Markdown narrative for human docs (VGI113).
@@ -138,6 +138,7 @@ def _make_option_scalar(
         doc_md=doc_md,
         keywords=keywords,
         category="options",
+        examples=examples,
     )
 
     class _OptionScalar(ScalarFunction):
@@ -148,12 +149,6 @@ def _make_option_scalar(
             description = summary
             categories = ["quant", "options"]
             tags = fn_tags
-            examples = [
-                FunctionExample(
-                    sql=f"SELECT quant.main.{fname}(100, 100, 0.05, 0.2, 1, 'call') AS value",
-                    description=example_extra,
-                ),
-            ]
 
         @classmethod
         def compute(
@@ -183,7 +178,16 @@ def _camel(name: str) -> str:
 BsPriceFunction = _make_option_scalar(
     "bs_price",
     "Black-Scholes price of a European option ('call'|'put')",
-    "Standard at-the-money BS call price",
+    [
+        (
+            "Black-Scholes fair value of an at-the-money 1-year European call.",
+            "SELECT quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'call') AS call_price",
+        ),
+        (
+            "Price the matching European put (same spot, strike, rate, vol, maturity).",
+            "SELECT quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'put') AS put_price",
+        ),
+    ],
     title="Black-Scholes Option Price",
     doc_llm=(
         "## bs_price\n\n"
@@ -226,7 +230,16 @@ BsPriceFunction = _make_option_scalar(
 BsDeltaFunction = _make_option_scalar(
     "bs_delta",
     "Black-Scholes delta d(value)/d(spot) of a European option",
-    "Delta of an ATM call",
+    [
+        (
+            "Delta (hedge ratio) of an at-the-money 1-year European call; near 0.64.",
+            "SELECT quant.main.bs_delta(100, 100, 0.05, 0.2, 1, 'call') AS call_delta",
+        ),
+        (
+            "Delta of the matching European put is negative (call delta minus 1).",
+            "SELECT quant.main.bs_delta(100, 100, 0.05, 0.2, 1, 'put') AS put_delta",
+        ),
+    ],
     title="Black-Scholes Option Delta",
     doc_llm=(
         "## bs_delta\n\n"
@@ -262,7 +275,12 @@ BsDeltaFunction = _make_option_scalar(
 BsGammaFunction = _make_option_scalar(
     "bs_gamma",
     "Black-Scholes gamma d2(value)/d(spot)2 of a European option",
-    "Gamma of an ATM call",
+    [
+        (
+            "Gamma of an at-the-money 1-year European call (identical for the put).",
+            "SELECT quant.main.bs_gamma(100, 100, 0.05, 0.2, 1, 'call') AS gamma",
+        ),
+    ],
     title="Black-Scholes Option Gamma",
     doc_llm=(
         "## bs_gamma\n\n"
@@ -297,7 +315,16 @@ BsGammaFunction = _make_option_scalar(
 BsVegaFunction = _make_option_scalar(
     "bs_vega",
     "Black-Scholes vega d(value)/d(vol), per 1.00 of volatility",
-    "Vega of an ATM call (per 1.00 vol)",
+    [
+        (
+            "Vega (per 1.00 vol) of an at-the-money 1-year European call; near 37.52.",
+            "SELECT quant.main.bs_vega(100, 100, 0.05, 0.2, 1, 'call') AS vega",
+        ),
+        (
+            "Convert to the desk 'per 1% vol' convention by dividing by 100.",
+            "SELECT quant.main.bs_vega(100, 100, 0.05, 0.2, 1, 'call') / 100 AS vega_per_pct",
+        ),
+    ],
     title="Black-Scholes Option Vega",
     doc_llm=(
         "## bs_vega\n\n"
@@ -333,7 +360,16 @@ BsVegaFunction = _make_option_scalar(
 BsThetaFunction = _make_option_scalar(
     "bs_theta",
     "Black-Scholes theta d(value)/d(t), per year",
-    "Theta of an ATM call (per year)",
+    [
+        (
+            "Theta (per year) of an at-the-money 1-year European call; negative.",
+            "SELECT quant.main.bs_theta(100, 100, 0.05, 0.2, 1, 'call') AS theta",
+        ),
+        (
+            "Convert to per-calendar-day time decay by dividing by 365.",
+            "SELECT quant.main.bs_theta(100, 100, 0.05, 0.2, 1, 'call') / 365 AS theta_per_day",
+        ),
+    ],
     title="Black-Scholes Option Theta",
     doc_llm=(
         "## bs_theta\n\n"
@@ -368,7 +404,16 @@ BsThetaFunction = _make_option_scalar(
 BsRhoFunction = _make_option_scalar(
     "bs_rho",
     "Black-Scholes rho d(value)/d(rate), per 1.00 of the rate",
-    "Rho of an ATM call (per 1.00 rate)",
+    [
+        (
+            "Rho (per 1.00 rate) of an at-the-money 1-year European call; positive.",
+            "SELECT quant.main.bs_rho(100, 100, 0.05, 0.2, 1, 'call') AS call_rho",
+        ),
+        (
+            "The matching European put has negative rho.",
+            "SELECT quant.main.bs_rho(100, 100, 0.05, 0.2, 1, 'put') AS put_rho",
+        ),
+    ],
     title="Black-Scholes Option Rho",
     doc_llm=(
         "## bs_rho\n\n"
@@ -447,13 +492,18 @@ class ImpliedVolFunction(ScalarFunction):
                 "vol surface",
                 "implied_vol",
             ],
+            examples=[
+                (
+                    "Recover the ~0.20 implied volatility from a Black-Scholes call price.",
+                    "SELECT quant.main.implied_vol(10.45, 100, 100, 0.05, 1, 'call') AS iv",
+                ),
+                (
+                    "Round-trip: price a call, then invert that price back to its vol.",
+                    "SELECT quant.main.implied_vol("
+                    "quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'call'), 100, 100, 0.05, 1, 'call') AS iv",
+                ),
+            ],
         )
-        examples = [
-            FunctionExample(
-                sql="SELECT quant.main.implied_vol(10.45, 100, 100, 0.05, 1, 'call') AS iv",
-                description="Recover ~0.20 vol from a BS call price",
-            ),
-        ]
 
     @classmethod
     def compute(
@@ -538,13 +588,17 @@ class BondPriceFunction(ScalarFunction):
                 "fixed income",
                 "bond_price",
             ],
+            examples=[
+                (
+                    "Clean price of a 10-year 5% semiannual par bond (coupon == yield) is 100.",
+                    "SELECT quant.main.bond_price(100, 0.05, 0.05, 10, 2) AS clean_price",
+                ),
+                (
+                    "When yield exceeds the coupon the bond trades at a discount (price < face).",
+                    "SELECT quant.main.bond_price(100, 0.05, 0.07, 10, 2) AS discount_price",
+                ),
+            ],
         )
-        examples = [
-            FunctionExample(
-                sql="SELECT quant.main.bond_price(100, 0.05, 0.05, 10, 2) AS clean_price",
-                description="A par bond (coupon == yield) prices to 100",
-            ),
-        ]
 
     @classmethod
     def compute(
@@ -608,13 +662,17 @@ class BondYieldFunction(ScalarFunction):
                 "coupon",
                 "bond_yield",
             ],
+            examples=[
+                (
+                    "Yield to maturity of a 10-year 5% semiannual bond quoted at par (100) is ~0.05.",
+                    "SELECT quant.main.bond_yield(100, 100, 0.05, 10, 2) AS ytm",
+                ),
+                (
+                    "A price below par implies a yield above the 5% coupon.",
+                    "SELECT quant.main.bond_yield(95, 100, 0.05, 10, 2) AS ytm",
+                ),
+            ],
         )
-        examples = [
-            FunctionExample(
-                sql="SELECT quant.main.bond_yield(100, 100, 0.05, 10, 2) AS ytm",
-                description="A par-priced 5% bond yields ~0.05",
-            ),
-        ]
 
     @classmethod
     def compute(
@@ -677,13 +735,17 @@ class BondDurationFunction(ScalarFunction):
                 "fixed income",
                 "bond_duration",
             ],
+            examples=[
+                (
+                    "Modified duration (years) of a 10-year 5% semiannual par bond; near 7.8.",
+                    "SELECT quant.main.bond_duration(100, 0.05, 0.05, 10, 2) AS modified_duration",
+                ),
+                (
+                    "Estimate the price drop from a 100 bp yield rise: -duration * 0.01 * price.",
+                    "SELECT -quant.main.bond_duration(100, 0.05, 0.05, 10, 2) * 0.01 * 100 AS approx_price_change",
+                ),
+            ],
         )
-        examples = [
-            FunctionExample(
-                sql="SELECT quant.main.bond_duration(100, 0.05, 0.05, 10, 2) AS modified_duration",
-                description="Modified duration of a 10y par bond",
-            ),
-        ]
 
     @classmethod
     def compute(
@@ -746,13 +808,13 @@ class BondConvexityFunction(ScalarFunction):
                 "fixed income",
                 "bond_convexity",
             ],
+            examples=[
+                (
+                    "Convexity of a 10-year 5% semiannual par bond; near 73.65 and positive.",
+                    "SELECT quant.main.bond_convexity(100, 0.05, 0.05, 10, 2) AS convexity",
+                ),
+            ],
         )
-        examples = [
-            FunctionExample(
-                sql="SELECT quant.main.bond_convexity(100, 0.05, 0.05, 10, 2) AS convexity",
-                description="Convexity of a 10y par bond",
-            ),
-        ]
 
     @classmethod
     def compute(
@@ -828,15 +890,19 @@ class YearFractionFunction(ScalarFunction):
                     "convention",
                     "year_fraction",
                 ],
+                examples=[
+                    (
+                        "Year fraction of a Jan-1 to Jul-1 span under ACT/360 is 181/360 (~0.5028).",
+                        "SELECT quant.main.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360') AS yf",
+                    ),
+                    (
+                        "The same span under 30/360 is exactly 0.5 (six 30-day months).",
+                        "SELECT quant.main.year_fraction(DATE '2026-01-01', DATE '2026-07-01', '30/360') AS yf",
+                    ),
+                ],
             ),
             "vgi.executable_examples": _YEAR_FRACTION_EXECUTABLE_EXAMPLES,
         }
-        examples = [
-            FunctionExample(
-                sql="SELECT quant.main.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360') AS yf",
-                description="Half-ish year under ACT/360 (181/360)",
-            ),
-        ]
 
     @classmethod
     def compute(
@@ -892,13 +958,17 @@ class DiscountFactorFunction(ScalarFunction):
                 "discounting",
                 "discount_factor",
             ],
+            examples=[
+                (
+                    "One-year continuously-compounded discount factor at 5% is exp(-0.05) (~0.9512).",
+                    "SELECT quant.main.discount_factor(0.05, 1) AS df",
+                ),
+                (
+                    "Two-year discount factor at 5% is exp(-0.10) (~0.9048).",
+                    "SELECT quant.main.discount_factor(0.05, 2) AS df",
+                ),
+            ],
         )
-        examples = [
-            FunctionExample(
-                sql="SELECT quant.main.discount_factor(0.05, 1) AS df",
-                description="One-year discount factor at 5%",
-            ),
-        ]
 
     @classmethod
     def compute(
@@ -951,13 +1021,17 @@ class PresentValueFunction(ScalarFunction):
                 "time value of money",
                 "present_value",
             ],
+            examples=[
+                (
+                    "Present value of 100 due in one year, discounted continuously at 5% (~95.12).",
+                    "SELECT quant.main.present_value(100, 0.05, 1) AS pv",
+                ),
+                (
+                    "Present value of 1000 due in two years at 5% is 1000 * exp(-0.10) (~904.84).",
+                    "SELECT quant.main.present_value(1000, 0.05, 2) AS pv",
+                ),
+            ],
         )
-        examples = [
-            FunctionExample(
-                sql="SELECT quant.main.present_value(100, 0.05, 1) AS pv",
-                description="Present value of 100 due in one year at 5%",
-            ),
-        ]
 
     @classmethod
     def compute(
