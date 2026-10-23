@@ -30,7 +30,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Sequence
 from datetime import date
-from typing import Annotated
+from typing import Annotated, Any
 
 import pyarrow as pa
 from vgi.arguments import ConstParam, Param, Returns
@@ -69,7 +69,7 @@ _YEAR_FRACTION_EXECUTABLE_EXAMPLES = (
 
 
 def _map_floats(
-    columns: Sequence[pa.Array],
+    columns: Sequence[pa.Array[Any]],
     fn: Callable[..., float],
 ) -> pa.DoubleArray:
     pylists = [c.to_pylist() for c in columns]

@@ -1,11 +1,10 @@
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
-#     # Floored at 0.16.0: this worker exposes a browsable Table, and the
-#     # released signed vgi community extension expects the current
-#     # table-contents RPC schema (required_filters); 0.14.x fails ATTACH with an
-#     # out-of-date Arrow schema. Keep in sync with pyproject.toml.
-#     "vgi-python[http]>=0.16.0",
+#     # Floored at 0.46.1: the released signed vgi community extension speaks
+#     # VGI protocol 2.x; older vgi-python lines fail ATTACH with a
+#     # protocol_version mismatch. Keep in sync with pyproject.toml.
+#     "vgi-python[http]>=0.46.1",
 #     "QuantLib>=1.42",
 #     "pyarrow",
 # ]
