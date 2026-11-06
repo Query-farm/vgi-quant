@@ -8,7 +8,7 @@ statement ok
 LOAD vgi;
 
 statement ok
-ATTACH 'quant' AS quant (TYPE vgi, LOCATION '${VGI_QUANT_WORKER}');
+ATTACH 'quant' AS quant (TYPE vgi, LOCATION '{VGI_QUANT_WORKER}');
 
 # Standard textbook BS call: spot=100, strike=100, rate=0.05, vol=0.2, ttm=1.
 query I

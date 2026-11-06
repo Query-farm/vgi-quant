@@ -128,7 +128,7 @@ make test-sql                    # end-to-end SQL via haybarn-unittest
 uv run ruff check . && uv run mypy vgi_quant/
 ```
 
-`make test-sql` needs `haybarn-unittest` (`uv tool install haybarn-unittest`)
+`make test-sql` needs `haybarn-unittest` (`uv tool install --prerelease allow 'haybarn-unittest>=2.0.0rc11,<2.1'`)
 on `PATH` (`export PATH="$HOME/.local/bin:$PATH"`); the Makefile points
 `VGI_QUANT_WORKER` at the worker run as a `uv` stdio subprocess.
 

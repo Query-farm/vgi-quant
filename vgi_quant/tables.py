@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from typing import ClassVar
 
 import pyarrow as pa
-from vgi.catalog import Table
+from vgi.catalog import Table, constraint_record
 from vgi.table_function import (
     BindParams,
     ProcessParams,
@@ -160,8 +160,30 @@ DAY_COUNT_CONVENTIONS_TABLE = Table(
     name="day_count_conventions",
     function=DayCountConventionsFunction,
     comment="The day-count convention strings year_fraction() accepts, one per row",
-    not_null=("name",),
-    primary_key=(("name",),),
+    # VGI protocol 3 constraints are canonical records; DuckDB reads only
+    # ENFORCED + ALL_ROWS ones. Every row has a distinct, non-null `name`. The
+    # NOT_NULL record restates the PK's implied NOT NULL so the catalog still
+    # declares an explicit NOT NULL column (vgi-lint VGI804).
+    constraints=(
+        constraint_record(
+            ["main"],
+            "day_count_conventions",
+            "pk",
+            "PRIMARY_KEY",
+            [["name"]],
+            enforcement="ENFORCED",
+            validation="ALL_ROWS",
+        ),
+        constraint_record(
+            ["main"],
+            "day_count_conventions",
+            "name_not_null",
+            "NOT_NULL",
+            [["name"]],
+            enforcement="ENFORCED",
+            validation="ALL_ROWS",
+        ),
+    ),
     tags={
         **object_tags(
             category="conventions",

@@ -8,7 +8,7 @@ statement ok
 LOAD vgi;
 
 statement ok
-ATTACH 'quant' AS quant (TYPE vgi, LOCATION '${VGI_QUANT_WORKER}');
+ATTACH 'quant' AS quant (TYPE vgi, LOCATION '{VGI_QUANT_WORKER}');
 
 # 2026-01-01 -> 2026-07-01 is 181 days; ACT/360 = 181/360 ~ 0.5028.
 query I
