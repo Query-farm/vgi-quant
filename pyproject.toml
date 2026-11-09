@@ -1,6 +1,6 @@
 [project]
 name = "vgi-quant"
-version = "0.2.0"
+version = "0.3.0"
 description = "Option pricing + Greeks, bond pricing/yield, and day-count math for DuckDB via VGI (QuantLib)"
 readme = "README.md"
 keywords = [
