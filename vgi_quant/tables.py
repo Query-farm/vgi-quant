@@ -187,7 +187,7 @@ DAY_COUNT_CONVENTIONS_TABLE = Table(
     tags={
         **object_tags(
             category="conventions",
-            title="Day-Count Conventions Reference Table",
+            title="Day-count convention list",
             doc_llm=(
                 "## day_count_conventions (table)\n\n"
                 "A reference **table** of every day-count convention string "

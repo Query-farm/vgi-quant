@@ -305,6 +305,10 @@ _QUANT_CATALOG = Catalog(
     comment="Option pricing + Greeks, bond pricing/yield, and day-count math for SQL (QuantLib)",
     tags={
         "vgi.title": "Quantitative Finance Math",
+        "vgi.subtitle": (
+            "Black-Scholes option prices and Greeks, bond pricing and yield, "
+            "and day-count math as SQL functions, backed by QuantLib."
+        ),
         "vgi.keywords": json.dumps(
             [
                 "quant",
@@ -338,7 +342,7 @@ _QUANT_CATALOG = Catalog(
             path=["main"],
             comment="Option/Greeks, bond, and day-count functions: the quant catalog's single schema",
             tags={
-                "vgi.title": "Quant — main",
+                "vgi.title": "Quant functions",
                 "vgi.keywords": json.dumps(
                     [
                         "quant",
