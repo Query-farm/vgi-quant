@@ -1,10 +1,10 @@
 # /// script
 # requires-python = ">=3.13"
 # dependencies = [
-#     # Floored at 0.50.0: the released signed vgi community extension speaks
-#     # VGI protocol vgi.v3 / 3.2; older vgi-python lines fail ATTACH with a
+#     # Floored at 0.51.0: the released signed vgi community extension speaks
+#     # VGI protocol vgi.v3 / 3.3; older vgi-python lines fail ATTACH with a
 #     # protocol_version mismatch. Keep in sync with pyproject.toml.
-#     "vgi-python[http]>=0.50.0",
+#     "vgi-python[http]>=0.51.0",
 #     "QuantLib>=1.42",
 #     "pyarrow",
 # ]

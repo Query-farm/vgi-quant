@@ -19,7 +19,7 @@ functions, backed by [QuantLib](https://www.quantlib.org/) (the
 
 ```sql
 INSTALL vgi FROM community; LOAD vgi;
-ATTACH 'quant' (TYPE vgi, LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-quant@v0.3.0 vgi-quant-worker');
+ATTACH 'quant' (TYPE vgi, LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-quant@v0.4.0 vgi-quant-worker');
 
 SELECT quant.bs_price(100, 100, 0.05, 0.2, 1, 'call');        -- ~10.4506
 SELECT quant.bs_delta(100, 100, 0.05, 0.2, 1, 'call');        -- ~0.6368
@@ -47,7 +47,7 @@ The worker isn't on PyPI; [uv](https://docs.astral.sh/uv/) runs it straight from
 INSTALL vgi FROM community;
 LOAD vgi;
 
-ATTACH 'quant' AS quant (TYPE vgi, LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-quant@v0.3.0 vgi-quant-worker');
+ATTACH 'quant' AS quant (TYPE vgi, LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-quant@v0.4.0 vgi-quant-worker');
 
 -- Black-Scholes fair value of an at-the-money 1-year European call.
 SELECT quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'call') AS call_price;
@@ -56,14 +56,14 @@ SELECT quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'call') AS call_price;
 SELECT quant.main.bs_delta(100, 100, 0.05, 0.2, 1, 'call') AS delta;
 ```
 
-Change `@v0.3.0` to move to a newer release.
+Change `@v0.4.0` to move to a newer release.
 
 ### Other ways to run it
 
 - **Docker** (the image bundles the worker and its dependencies):
 
   ```sql
-  ATTACH 'quant' AS quant (TYPE vgi, LOCATION 'docker://ghcr.io/query-farm/vgi-quant:0.3.0');
+  ATTACH 'quant' AS quant (TYPE vgi, LOCATION 'docker://ghcr.io/query-farm/vgi-quant:0.4.0');
   ```
 
 - **From a local checkout** (`git clone https://github.com/Query-farm/vgi-quant`), point `LOCATION` at `uv run --project /path/to/vgi-quant vgi-quant-worker`.
