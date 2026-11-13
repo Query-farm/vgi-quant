@@ -4,7 +4,7 @@
 
 <p align="center"><em>A <a href="https://query.farm">Query.Farm</a> VGI worker for DuckDB.</em></p>
 
-# Option Pricing, Greeks & Bond Analytics in DuckDB
+# Option Pricing, Greeks, Bond & Carry Analytics in DuckDB
 
 > **vgi-quant** · a [Query.Farm](https://query.farm) VGI worker · powered by QuantLib
 
@@ -19,7 +19,7 @@ functions, backed by [QuantLib](https://www.quantlib.org/) (the
 
 ```sql
 INSTALL vgi FROM community; LOAD vgi;
-ATTACH 'quant' (TYPE vgi, LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-quant@v0.4.0 vgi-quant-worker');
+ATTACH 'quant' (TYPE vgi, LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-quant@v0.5.0 vgi-quant-worker');
 
 SELECT quant.bs_price(100, 100, 0.05, 0.2, 1, 'call');        -- ~10.4506
 SELECT quant.bs_delta(100, 100, 0.05, 0.2, 1, 'call');        -- ~0.6368
@@ -47,7 +47,7 @@ The worker isn't on PyPI; [uv](https://docs.astral.sh/uv/) runs it straight from
 INSTALL vgi FROM community;
 LOAD vgi;
 
-ATTACH 'quant' AS quant (TYPE vgi, LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-quant@v0.4.0 vgi-quant-worker');
+ATTACH 'quant' AS quant (TYPE vgi, LOCATION 'uvx --from git+https://github.com/Query-farm/vgi-quant@v0.5.0 vgi-quant-worker');
 
 -- Black-Scholes fair value of an at-the-money 1-year European call.
 SELECT quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'call') AS call_price;
@@ -56,7 +56,7 @@ SELECT quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'call') AS call_price;
 SELECT quant.main.bs_delta(100, 100, 0.05, 0.2, 1, 'call') AS delta;
 ```
 
-Change `@v0.4.0` to move to a newer release.
+Change `@v0.5.0` to move to a newer release.
 
 ### Other ways to run it
 
@@ -119,6 +119,13 @@ non-positive spot/strike/face/price, an unknown `opt_type` / `convention` /
 | `year_fraction` | scalar | `(start DATE, end DATE, convention)` | `DOUBLE` |
 | `discount_factor` | scalar | `(rate, ttm)` | `DOUBLE` |
 | `present_value` | scalar | `(amount, rate, ttm)` | `DOUBLE` |
+| `implied_carry_rate` | scalar | `(spot, forward, ttm)` | `DOUBLE` (continuous annual rate) |
+| `calendar_spread_rate` | scalar | `(near_price, far_price, near_ttm, far_ttm)` | `DOUBLE` (continuous annual rate) |
+| `box_spread_rate` | scalar | `(box_price, low_strike, high_strike, ttm)` | `DOUBLE` (continuous annual rate) |
+| `tbill_rate` | scalar | `(discount_rate, days)` | `DOUBLE` (continuous annual rate) |
+| `funding_rate_annual` | scalar | `(rate, interval_hours)` | `DOUBLE` (continuous annual rate) |
+| `simple_to_continuous` | scalar | `(rate, ttm)` | `DOUBLE` |
+| `continuous_to_simple` | scalar | `(rate, ttm)` | `DOUBLE` |
 | `day_count_conventions` | table | `()` | `(name VARCHAR)` |
 
 ## Conventions and sign choices
@@ -145,6 +152,36 @@ non-positive spot/strike/face/price, an unknown `opt_type` / `convention` /
 * **Day-count** `year_fraction` supports `ACT/360`, `ACT/365`, `30/360`
   (US bond basis) and `ACT/ACT` (ISDA). `discount_factor` / `present_value` use
   continuous compounding.
+
+## Carry: comparing financing rates
+
+The carry functions turn one instrument's quote into a **continuously
+compounded annual rate**, the same basis as `rate` everywhere else in this
+worker. With every instrument on one basis, a futures curve, a box spread, a
+Treasury bill and a perp funding rate can be compared or subtracted directly.
+
+| Function | Formula | Read it as |
+| --- | --- | --- |
+| `implied_carry_rate(spot, forward, ttm)` | `ln(forward/spot)/ttm` | net cost of carry (financing minus income); negative in backwardation |
+| `calendar_spread_rate(near, far, near_ttm, far_ttm)` | `ln(far/near)/(far_ttm-near_ttm)` | forward rate between two futures expiries |
+| `box_spread_rate(box_price, low, high, ttm)` | `ln((high-low)/box_price)/ttm` | rate a box buyer lends at; `box_price = call(low) - call(high) + put(high) - put(low)` |
+| `tbill_rate(discount_rate, days)` | `-ln(1 - d*days/360)/(days/365)` | a bank-discount bill quote (e.g. `^IRX`) as a true rate |
+| `funding_rate_annual(rate, interval_hours)` | `ln(1+rate)*8760/interval_hours` | perp funding a short earns (positive = longs pay) |
+| `simple_to_continuous(rate, ttm)` / `continuous_to_simple(rate, ttm)` | `ln(1+r*t)/t` / `(exp(r*t)-1)/t` | move between quoting bases |
+
+```sql
+-- Gold cash-and-carry vs cash, and a short perp hedged with a long future.
+SELECT ROUND(quant.implied_carry_rate(4000, 4050, 0.25), 4)                     AS futures_carry, -- 0.0497
+       ROUND(quant.tbill_rate(0.0412, 91), 4)                                    AS bill,          -- 0.0420
+       ROUND(quant.box_spread_rate(989, 5000, 6000, 0.25), 4)                    AS box,           -- 0.0442
+       ROUND(quant.funding_rate_annual(0.0001, 8)
+             - quant.implied_carry_rate(4000, 4050, 0.25), 4)                    AS perp_vs_futures; -- 0.0598
+```
+
+The inputs come from other workers: futures and spot prices from
+`vgi-yfinance`, option legs from `vgi-tastytrade`, bill quotes from
+`vgi-treasury` or `vgi-fred`, and funding rates from `vgi-perps` (which already
+annualizes them; use `funding_rate_annual` on raw venue rates).
 
 ## Day-count conventions
 

@@ -21,6 +21,7 @@ quant_worker.py        repo-root stdio entry point; PEP 723 inline deps; main()
 vgi_quant/
   quant.py             pure compute over QuantLib; no Arrow/VGI; unit-testable
   scalars.py           per-row scalars (options/bonds/conventions)
+  carry.py             per-row carry scalars (implied financing rates; math in quant.py)
   tables.py            discovery table function: day_count_conventions
   schema_utils.py      pa.Field comment / column-doc helper
 tests/                 pytest: test_quant (pure), test_tables (in-proc), test_scalars (Client RPC)
@@ -111,6 +112,12 @@ args are rejected for scalars and only work on table functions.
   **73.65** (both positive, duration < maturity).
 - `year_fraction(2026-01-01, 2026-07-01, 'ACT/360')` = **181/360 ≈ 0.5028**;
   `'30/360'` = **0.5**.
+- Carry (all continuous annual rates): `implied_carry_rate(4000, 4050, 0.25)` ≈
+  **0.04969**; `box_spread_rate(989, 5000, 6000, 0.25)` ≈ **0.04424**;
+  `tbill_rate(0.0412, 91)` ≈ **0.04199**; `funding_rate_annual(0.0001, 8)` ≈
+  **0.10949**. A box priced from four Black-Scholes legs recovers the input
+  rate exactly (tested), and `calendar_spread_rate` legs compose to the
+  spot-to-far `implied_carry_rate`.
 
 ## Licensing
 

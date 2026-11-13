@@ -1,0 +1,99 @@
+# name: test/sql/carry.test
+# description: Carry math: implied financing rates on one continuous basis
+# group: [vgi_quant]
+
+require-env VGI_QUANT_WORKER
+
+statement ok
+LOAD vgi;
+
+statement ok
+ATTACH 'quant' AS quant (TYPE vgi, LOCATION '{VGI_QUANT_WORKER}');
+
+# Gold spot 4000, 3-month future 4050: ln(4050/4000)/0.25.
+query I
+SELECT ROUND(quant.implied_carry_rate(4000, 4050, 0.25), 5);
+----
+0.04969
+
+# Backwardation gives a negative carry.
+query I
+SELECT quant.implied_carry_rate(100, 99, 1) < 0;
+----
+true
+
+query I
+SELECT ROUND(quant.calendar_spread_rate(4050, 4110, 0.25, 0.5), 5);
+----
+0.05882
+
+# Curve legs via LEAD, one row per leg.
+query RR
+SELECT ttm::DOUBLE, ROUND(quant.calendar_spread_rate(px, nx_px, ttm, nx_ttm), 4)
+FROM (SELECT ttm, px, LEAD(px) OVER (ORDER BY ttm) AS nx_px, LEAD(ttm) OVER (ORDER BY ttm) AS nx_ttm
+      FROM (VALUES (0.1, 4020.0), (0.25, 4050.0), (0.5, 4110.0)) c(ttm, px))
+WHERE nx_px IS NOT NULL ORDER BY ttm;
+----
+0.1	0.0496
+0.25	0.0588
+
+query I
+SELECT ROUND(quant.box_spread_rate(989, 5000, 6000, 0.25), 5);
+----
+0.04424
+
+# A box priced from Black-Scholes legs recovers the input rate.
+query I
+SELECT ROUND(quant.box_spread_rate(
+    quant.bs_price(100, 90, 0.045, 0.3, 0.5, 'call') - quant.bs_price(100, 110, 0.045, 0.3, 0.5, 'call')
+  + quant.bs_price(100, 110, 0.045, 0.3, 0.5, 'put') - quant.bs_price(100, 90, 0.045, 0.3, 0.5, 'put'),
+    90, 110, 0.5), 6);
+----
+0.045
+
+query I
+SELECT ROUND(quant.tbill_rate(0.0412, 91), 5);
+----
+0.04199
+
+query I
+SELECT ROUND(quant.funding_rate_annual(0.0001, 8), 5);
+----
+0.10949
+
+# Funding floor minus gold futures carry.
+query I
+SELECT ROUND(quant.funding_rate_annual(0.0001, 8) - quant.implied_carry_rate(4000, 4050, 0.25), 4);
+----
+0.0598
+
+query II
+SELECT ROUND(quant.simple_to_continuous(0.05, 0.5), 5), ROUND(quant.continuous_to_simple(0.05, 0.5), 5);
+----
+0.04939	0.05063
+
+query I
+SELECT ROUND(quant.continuous_to_simple(quant.simple_to_continuous(0.07, 2), 2), 9);
+----
+0.07
+
+# NULL in -> NULL out.
+query I
+SELECT quant.tbill_rate(NULL, 91) IS NULL;
+----
+true
+
+statement error
+SELECT quant.calendar_spread_rate(100, 101, 1.0, 0.5);
+----
+<REGEX>:.*far_ttm must be > near_ttm.*
+
+statement error
+SELECT quant.box_spread_rate(989, 6000, 5000, 0.25);
+----
+<REGEX>:.*high_strike must be > low_strike.*
+
+statement error
+SELECT quant.funding_rate_annual(0.0001, 0);
+----
+<REGEX>:.*interval_hours must be > 0.*

@@ -158,3 +158,86 @@ class TestConventions:
 
     def test_present_value(self) -> None:
         assert quant.present_value(100, 0.05, 1) == pytest.approx(100 * math.exp(-0.05), abs=1e-9)
+
+
+class TestCarry:
+    def test_implied_carry_rate(self) -> None:
+        assert quant.implied_carry_rate(4000, 4050, 0.25) == pytest.approx(math.log(4050 / 4000) / 0.25)
+        assert quant.implied_carry_rate(4000, 4050, 0.25) == pytest.approx(0.04969, abs=1e-5)
+
+    def test_backwardation_is_negative(self) -> None:
+        assert quant.implied_carry_rate(100, 99, 1) < 0
+
+    def test_carry_round_trips_forward_price(self) -> None:
+        # forward = spot * exp(rate * ttm) inverts implied_carry_rate.
+        rate = quant.implied_carry_rate(100, 103, 0.5)
+        assert 100 * math.exp(rate * 0.5) == pytest.approx(103)
+
+    def test_calendar_spread_rate(self) -> None:
+        assert quant.calendar_spread_rate(4050, 4110, 0.25, 0.5) == pytest.approx(0.058825, abs=1e-6)
+
+    def test_calendar_legs_compose(self) -> None:
+        # The spot->near and near->far legs average to the spot->far rate, weighted by time.
+        s, f1, f2 = 100.0, 101.0, 103.0
+        r1 = quant.implied_carry_rate(s, f1, 0.25)
+        r12 = quant.calendar_spread_rate(f1, f2, 0.25, 1.0)
+        assert (r1 * 0.25 + r12 * 0.75) == pytest.approx(quant.implied_carry_rate(s, f2, 1.0))
+
+    def test_calendar_spread_zero_near_is_spot(self) -> None:
+        assert quant.calendar_spread_rate(100, 105, 0, 1) == pytest.approx(quant.implied_carry_rate(100, 105, 1))
+
+    def test_box_spread_rate(self) -> None:
+        assert quant.box_spread_rate(989, 5000, 6000, 0.25) == pytest.approx(0.044244, abs=1e-6)
+
+    def test_box_priced_by_black_scholes_recovers_rate(self) -> None:
+        # Under BS, call(lo) - call(hi) + put(hi) - put(lo) = (hi - lo) * exp(-r t).
+        args = {"spot": 100.0, "rate": 0.045, "vol": 0.3, "ttm": 0.5}
+        legs = (
+            quant.bs_price(strike=90, opt_type="call", **args)
+            - quant.bs_price(strike=110, opt_type="call", **args)
+            + quant.bs_price(strike=110, opt_type="put", **args)
+            - quant.bs_price(strike=90, opt_type="put", **args)
+        )
+        assert quant.box_spread_rate(legs, 90, 110, 0.5) == pytest.approx(0.045, abs=1e-9)
+
+    def test_tbill_rate(self) -> None:
+        assert quant.tbill_rate(0.0412, 91) == pytest.approx(0.041991, abs=1e-6)
+
+    def test_tbill_rate_exceeds_discount_quote(self) -> None:
+        assert quant.tbill_rate(0.04, 182) > 0.04
+
+    def test_funding_rate_annual(self) -> None:
+        assert quant.funding_rate_annual(0.0001, 8) == pytest.approx(0.109495, abs=1e-6)
+        assert quant.funding_rate_annual(-0.0001, 1) < 0
+
+    def test_funding_hourly_equals_eight_hourly_compounded(self) -> None:
+        hourly = 0.0000125
+        eight = (1 + hourly) ** 8 - 1
+        assert quant.funding_rate_annual(hourly, 1) == pytest.approx(quant.funding_rate_annual(eight, 8))
+
+    def test_simple_continuous_round_trip(self) -> None:
+        assert quant.simple_to_continuous(0.05, 0.5) == pytest.approx(0.049385, abs=1e-6)
+        assert quant.continuous_to_simple(0.05, 0.5) == pytest.approx(0.050630, abs=1e-6)
+        assert quant.continuous_to_simple(quant.simple_to_continuous(0.07, 2), 2) == pytest.approx(0.07)
+
+    @pytest.mark.parametrize(
+        ("fn", "args"),
+        [
+            (quant.implied_carry_rate, (0, 100, 1)),
+            (quant.implied_carry_rate, (100, -1, 1)),
+            (quant.implied_carry_rate, (100, 101, 0)),
+            (quant.calendar_spread_rate, (100, 101, 0.5, 0.5)),
+            (quant.calendar_spread_rate, (100, 101, -0.1, 0.5)),
+            (quant.box_spread_rate, (989, 6000, 5000, 0.25)),
+            (quant.box_spread_rate, (0, 5000, 6000, 0.25)),
+            (quant.tbill_rate, (0.04, 0)),
+            (quant.tbill_rate, (4.0, 91)),
+            (quant.funding_rate_annual, (0.0001, 0)),
+            (quant.funding_rate_annual, (-1.0, 8)),
+            (quant.simple_to_continuous, (-3.0, 0.5)),
+            (quant.continuous_to_simple, (0.05, 0)),
+        ],
+    )
+    def test_invalid_inputs_raise(self, fn: object, args: tuple[float, ...]) -> None:
+        with pytest.raises(ValueError):
+            fn(*args)  # type: ignore[operator]

@@ -275,6 +275,112 @@ def present_value(amount: float, rate: float, ttm: float) -> float:
     return amount * math.exp(-rate * ttm)
 
 
+# ===========================================================================
+# Carry -- implied financing rates. Every function returns a continuously
+# compounded annual rate, the same basis as ``rate`` in the option and
+# discounting functions, so rates from different instruments compare directly.
+# ===========================================================================
+
+HOURS_PER_YEAR = 365.0 * 24.0
+
+
+def _positive(name: str, value: float) -> None:
+    if not value > 0:
+        raise ValueError(f"{name} must be > 0, got {value}")
+
+
+def implied_carry_rate(spot: float, forward: float, ttm: float) -> float:
+    """Annual rate implied by a spot price and a forward or futures price.
+
+    ``ln(forward / spot) / ttm``. This is the net cost of carry: financing
+    minus any income (dividends, lease rate, convenience yield). For gold the
+    income is roughly zero, so it reads as the financing rate.
+    """
+    _positive("spot", spot)
+    _positive("forward", forward)
+    _positive("ttm", ttm)
+    return math.log(forward / spot) / ttm
+
+
+def calendar_spread_rate(near_price: float, far_price: float, near_ttm: float, far_ttm: float) -> float:
+    """Annual rate implied between two futures expiries.
+
+    ``ln(far_price / near_price) / (far_ttm - near_ttm)``: the financing rate
+    for holding the underlying from the near expiry to the far one.
+    """
+    _positive("near_price", near_price)
+    _positive("far_price", far_price)
+    if near_ttm < 0:
+        raise ValueError(f"near_ttm must be >= 0, got {near_ttm}")
+    if not far_ttm > near_ttm:
+        raise ValueError(f"far_ttm must be > near_ttm, got far_ttm={far_ttm}, near_ttm={near_ttm}")
+    return math.log(far_price / near_price) / (far_ttm - near_ttm)
+
+
+def box_spread_rate(box_price: float, low_strike: float, high_strike: float, ttm: float) -> float:
+    """Annual rate implied by a European box spread's price.
+
+    A box (long call and short put at ``low_strike``, short call and long put
+    at ``high_strike``) pays ``high_strike - low_strike`` at expiry whatever
+    the underlying does, so ``ln((high_strike - low_strike) / box_price) / ttm``
+    is the rate a buyer lends at (and a seller borrows at).
+    """
+    _positive("box_price", box_price)
+    _positive("low_strike", low_strike)
+    _positive("ttm", ttm)
+    if not high_strike > low_strike:
+        raise ValueError(f"high_strike must be > low_strike, got {high_strike} <= {low_strike}")
+    return math.log((high_strike - low_strike) / box_price) / ttm
+
+
+def tbill_rate(discount_rate: float, days: float) -> float:
+    """Annual rate of a Treasury bill quoted on the bank-discount basis.
+
+    Bills are quoted as a discount yield ``d`` on ACT/360, so the price per 1
+    of face is ``1 - d * days / 360``. The result is ``-ln(price) / (days / 365)``.
+    """
+    _positive("days", days)
+    price = 1.0 - discount_rate * days / 360.0
+    if not price > 0:
+        raise ValueError(f"discount_rate {discount_rate} over {days} days gives a non-positive price")
+    return -math.log(price) / (days / 365.0)
+
+
+def funding_rate_annual(rate: float, interval_hours: float) -> float:
+    """Annual rate equivalent to a perpetual-futures funding rate.
+
+    ``rate`` is paid every ``interval_hours`` (8 on most venues, 1 on
+    Hyperliquid). Payments compound, so the result is
+    ``ln(1 + rate) * 8760 / interval_hours``. A positive rate means longs pay
+    shorts, so it is the rate a short earns.
+    """
+    _positive("interval_hours", interval_hours)
+    if not rate > -1:
+        raise ValueError(f"rate must be > -1, got {rate}")
+    return math.log1p(rate) * HOURS_PER_YEAR / interval_hours
+
+
+def simple_to_continuous(rate: float, ttm: float) -> float:
+    """Convert a simple (money-market) annual rate over ``ttm`` years to continuous.
+
+    ``ln(1 + rate * ttm) / ttm``.
+    """
+    _positive("ttm", ttm)
+    growth = 1.0 + rate * ttm
+    if not growth > 0:
+        raise ValueError(f"simple rate {rate} over {ttm} years loses more than the principal")
+    return math.log(growth) / ttm
+
+
+def continuous_to_simple(rate: float, ttm: float) -> float:
+    """Convert a continuously compounded annual rate to a simple rate over ``ttm`` years.
+
+    ``(exp(rate * ttm) - 1) / ttm``.
+    """
+    _positive("ttm", ttm)
+    return math.expm1(rate * ttm) / ttm
+
+
 # Re-export the Greek functions keyed by name for the scalar adapters.
 GREEKS: dict[str, Callable[[float, float, float, float, float, str], float]] = {
     "bs_price": bs_price,

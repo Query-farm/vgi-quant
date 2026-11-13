@@ -20,6 +20,7 @@ Usage:
     SELECT quant.bond_duration(100, 0.05, 0.05, 10, 2);      -- modified duration
     SELECT quant.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360');
     SELECT quant.discount_factor(0.05, 1);                   -- exp(-0.05)
+    SELECT quant.implied_carry_rate(4000, 4050, 0.25);       -- ~0.0497 carry
     SELECT * FROM quant.day_count_conventions();
 """
 
@@ -30,11 +31,13 @@ import json
 from vgi import Worker
 from vgi.catalog import Catalog, Schema
 
+from vgi_quant.carry import CARRY_FUNCTIONS
 from vgi_quant.scalars import SCALAR_FUNCTIONS
 from vgi_quant.tables import TABLE_FUNCTIONS, TABLES
 
 _FUNCTIONS: list[type] = [
     *SCALAR_FUNCTIONS,
+    *CARRY_FUNCTIONS,
     *TABLE_FUNCTIONS,
 ]
 
@@ -43,8 +46,11 @@ _CATALOG_DESCRIPTION_LLM = (
     "Greeks (price, delta, gamma, vega, theta, rho) and implied volatility; price fixed-rate bonds "
     "and invert price to yield to maturity, with modified duration and convexity; compute day-count "
     "year fractions ('ACT/360', 'ACT/365', '30/360', 'ACT/ACT') between two dates and continuously-"
-    "compounded discount factors and present values. Backed by QuantLib. Use for option pricing, "
-    "Greeks, bond analytics, yield/duration, and day-count / discounting questions in SQL."
+    "compounded discount factors and present values; and carry math that turns a futures basis, "
+    "a futures calendar spread, a box spread, a T-bill discount quote or a perpetual-futures "
+    "funding rate into one continuously compounded annual rate so they compare directly. Backed "
+    "by QuantLib. Use for option pricing, Greeks, bond analytics, yield/duration, day-count / "
+    "discounting, and financing-rate / cost-of-carry / basis-trade questions in SQL."
 )
 
 _CATALOG_DESCRIPTION_MD = (
@@ -90,7 +96,8 @@ _CATALOG_DESCRIPTION_MD = (
 _SCHEMA_DESCRIPTION_LLM = (
     "Option pricing + Greeks (Black-Scholes), implied volatility, fixed-rate bond pricing / yield / "
     "modified duration / convexity, day-count year fractions, and continuous discounting / present "
-    "value functions."
+    "value functions, and carry functions that put futures basis, calendar spreads, box spreads, "
+    "T-bills and perp funding on one continuously compounded annual rate."
 )
 
 _SCHEMA_DESCRIPTION_MD = (
@@ -98,14 +105,17 @@ _SCHEMA_DESCRIPTION_MD = (
     "The single schema of the `quant` catalog. It groups every quantitative-finance "
     "calculation the worker exposes over Apache Arrow into one namespace.\n\n"
     "## What lives here\n\n"
-    "Three families of functionality:\n\n"
+    "Four families of functionality:\n\n"
     "- **Options** — closed-form Black-Scholes pricing and the full set of first- and "
     "second-order Greeks, plus inversion of a market price back to implied volatility.\n"
     "- **Fixed-rate bonds** — clean pricing from a yield, the inverse yield-to-maturity "
     "solve, and interest-rate risk measures (modified duration and convexity).\n"
     "- **Day-count & discounting** — year fractions under the common day-count "
     "conventions and continuously-compounded discount factors and present values, "
-    "with a discovery listing of the accepted convention strings.\n\n"
+    "with a discovery listing of the accepted convention strings.\n"
+    "- **Carry** — the annual financing rate implied by a futures basis, a futures "
+    "calendar spread, a box spread, a T-bill discount quote or a perp funding rate, "
+    "all on one continuous basis, plus simple/continuous rate conversion.\n\n"
     "## When to use it\n\n"
     "Use this schema for option pricing and risk sensitivities, bond price/yield "
     "conversion and rate-risk analytics, and day-count or present-value math directly "
@@ -149,6 +159,20 @@ _SCHEMA_EXAMPLE_QUERIES = json.dumps(
             "description": "List the supported day-count convention names, alphabetically.",
             "sql": "SELECT name FROM quant.main.day_count_conventions() ORDER BY name",
         },
+        {
+            "description": "Gold cash-and-carry: futures carry over the 3-month T-bill rate.",
+            "sql": (
+                "SELECT ROUND(quant.main.implied_carry_rate(4000, 4050, 0.25)"
+                " - quant.main.tbill_rate(0.0412, 91), 4) AS excess_carry"
+            ),
+        },
+        {
+            "description": "Short perp at the 1 bp/8h funding floor, hedged with a long future.",
+            "sql": (
+                "SELECT ROUND(quant.main.funding_rate_annual(0.0001, 8)"
+                " - quant.main.implied_carry_rate(4000, 4050, 0.25), 4) AS net_carry"
+            ),
+        },
     ]
 )
 
@@ -174,6 +198,13 @@ _SCHEMA_CATEGORIES = json.dumps(
         {
             "name": "conventions",
             "description": ("Day-count year fractions and continuously-compounded discounting and present-value math."),
+        },
+        {
+            "name": "carry",
+            "description": (
+                "Implied financing rates from futures basis, calendar spreads, box spreads, "
+                "T-bill discount quotes and perpetual-futures funding, on one continuous basis."
+            ),
         },
     ]
 )
@@ -293,6 +324,56 @@ _AGENT_TEST_TASKS = json.dumps(
             ),
         },
         {
+            "name": "gold_futures_carry",
+            "prompt": (
+                "Gold trades at 4000 spot and the futures contract expiring in 0.25 years trades "
+                "at 4050. What continuously compounded annual financing rate does that imply? "
+                "Round to 4 decimal places."
+            ),
+        },
+        {
+            "name": "box_spread_lending_rate",
+            "prompt": (
+                "A European SPX box spread with strikes 5000 and 6000 and 0.25 years to expiry "
+                "costs 989 (in index points). What continuously compounded annual rate does "
+                "buying it lend at? Round to 4 decimal places."
+            ),
+        },
+        {
+            "name": "perp_funding_vs_futures",
+            "prompt": (
+                "A perpetual future pays 0.0001 funding every 8 hours to shorts. Gold futures "
+                "imply carry from spot 4000 and a 0.25-year future at 4050. Annualize the funding "
+                "on a continuously compounded basis and return funding minus futures carry, "
+                "rounded to 4 decimal places."
+            ),
+        },
+        {
+            "name": "gold_curve_forward_rate",
+            "prompt": (
+                "Gold futures expiring in 0.25 years trade at 4050 and those expiring in 0.5 "
+                "years trade at 4110. What continuously compounded annual rate is implied between "
+                "the two expiries? Round to 4 decimal places."
+            ),
+        },
+        {
+            "name": "tbill_vs_box",
+            "prompt": (
+                "A 91-day Treasury bill is quoted at a 4.12% bank-discount yield, and a European "
+                "box spread with strikes 5000/6000 and 0.25 years left costs 989. Put both on a "
+                "continuously compounded annual basis and return box rate minus bill rate, "
+                "rounded to 4 decimal places."
+            ),
+        },
+        {
+            "name": "simple_rate_conversions",
+            "prompt": (
+                "Convert a 5% simple annual rate over 0.5 years to its continuously compounded "
+                "equivalent, and convert a 5% continuously compounded rate to a simple rate over "
+                "0.5 years. Return both, each rounded to 4 decimal places."
+            ),
+        },
+        {
             "name": "list_day_count_conventions",
             "prompt": "List every day-count convention string this worker supports.",
         },
@@ -302,7 +383,7 @@ _AGENT_TEST_TASKS = json.dumps(
 _QUANT_CATALOG = Catalog(
     name="quant",
     default_schema="main",
-    comment="Option pricing + Greeks, bond pricing/yield, and day-count math for SQL (QuantLib)",
+    comment="Option pricing + Greeks, bond pricing/yield, day-count and carry math for SQL (QuantLib)",
     tags={
         "vgi.title": "Quantitative Finance Math",
         "vgi.subtitle": (
@@ -324,6 +405,9 @@ _QUANT_CATALOG = Catalog(
                 "day count",
                 "discounting",
                 "present value",
+                "cost of carry",
+                "funding rate",
+                "box spread",
                 "quantlib",
             ]
         ),
@@ -357,6 +441,9 @@ _QUANT_CATALOG = Catalog(
                         "year fraction",
                         "discount factor",
                         "present value",
+                        "carry",
+                        "box spread",
+                        "funding rate",
                     ]
                 ),
                 # VGI123 classifying tags use BARE keys (NOT vgi.-namespaced).

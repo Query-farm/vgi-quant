@@ -180,3 +180,22 @@ class TestConventions:
 
         out = _call(client, "present_value", _f64cols(amount=[100.0], rate=[0.05], ttm=[1.0]))
         assert out[0] == pytest.approx(100 * math.exp(-0.05), abs=1e-6)
+
+
+class TestCarry:
+    def test_implied_carry_rate(self, client: Client) -> None:
+        out = _call(client, "implied_carry_rate", _f64cols(spot=[4000.0, None], forward=[4050.0, 1.0], ttm=[0.25, 1.0]))
+        assert out[0] == pytest.approx(0.04969, abs=1e-5)
+        assert out[1] is None
+
+    def test_box_spread_rate(self, client: Client) -> None:
+        out = _call(client, "box_spread_rate", _f64cols(p=[989.0], lo=[5000.0], hi=[6000.0], ttm=[0.25]))
+        assert out[0] == pytest.approx(0.044244, abs=1e-6)
+
+    def test_funding_rate_annual(self, client: Client) -> None:
+        out = _call(client, "funding_rate_annual", _f64cols(rate=[0.0001], hours=[8.0]))
+        assert out[0] == pytest.approx(0.109495, abs=1e-6)
+
+    def test_inverted_calendar_errors(self, client: Client) -> None:
+        with pytest.raises(ClientError):
+            _call(client, "calendar_spread_rate", _f64cols(n=[100.0], f=[101.0], nt=[1.0], ft=[0.5]))

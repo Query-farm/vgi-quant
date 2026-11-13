@@ -63,3 +63,27 @@ tasks:
     success_criteria: "Lists the supported day-count conventions (ACT/360, ACT/365, 30/360, ACT/ACT)."
     ignore_column_names: true
     unordered: true
+  - name: gold_futures_carry
+    reference_sql: "SELECT ROUND(quant.main.implied_carry_rate(4000, 4050, 0.25), 4) AS carry"
+    success_criteria: "Returns ln(4050/4000)/0.25, approximately 0.0497."
+    ignore_column_names: true
+  - name: box_spread_lending_rate
+    reference_sql: "SELECT ROUND(quant.main.box_spread_rate(989, 5000, 6000, 0.25), 4) AS box_rate"
+    success_criteria: "Returns ln(1000/989)/0.25, approximately 0.0442."
+    ignore_column_names: true
+  - name: perp_funding_vs_futures
+    reference_sql: "SELECT ROUND(quant.main.funding_rate_annual(0.0001, 8) - quant.main.implied_carry_rate(4000, 4050, 0.25), 4) AS net"
+    success_criteria: "Returns about 0.0598 (0.1095 funding minus 0.0497 carry)."
+    ignore_column_names: true
+  - name: gold_curve_forward_rate
+    reference_sql: "SELECT ROUND(quant.main.calendar_spread_rate(4050, 4110, 0.25, 0.5), 4) AS fwd"
+    success_criteria: "Returns ln(4110/4050)/0.25, approximately 0.0588."
+    ignore_column_names: true
+  - name: tbill_vs_box
+    reference_sql: "SELECT ROUND(quant.main.box_spread_rate(989, 5000, 6000, 0.25) - quant.main.tbill_rate(0.0412, 91), 4) AS spread"
+    success_criteria: "Returns about 0.0023 (box ~0.0442 minus bill ~0.0420)."
+    ignore_column_names: true
+  - name: simple_rate_conversions
+    reference_sql: "SELECT ROUND(quant.main.simple_to_continuous(0.05, 0.5), 4) AS cont, ROUND(quant.main.continuous_to_simple(0.05, 0.5), 4) AS simple"
+    success_criteria: "Returns about 0.0494 continuous and 0.0506 simple."
+    ignore_column_names: true
