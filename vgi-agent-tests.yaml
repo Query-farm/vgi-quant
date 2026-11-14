@@ -87,3 +87,11 @@ tasks:
     reference_sql: "SELECT ROUND(quant.main.simple_to_continuous(0.05, 0.5), 4) AS cont, ROUND(quant.main.continuous_to_simple(0.05, 0.5), 4) AS simple"
     success_criteria: "Returns about 0.0494 continuous and 0.0506 simple."
     ignore_column_names: true
+  - name: box_from_black_scholes_legs
+    reference_sql: "WITH legs AS (SELECT quant.main.bs_price(100, 90, 0.05, 0.2, 0.5, 'call') - quant.main.bs_price(100, 110, 0.05, 0.2, 0.5, 'call') + quant.main.bs_price(100, 110, 0.05, 0.2, 0.5, 'put') - quant.main.bs_price(100, 90, 0.05, 0.2, 0.5, 'put') AS box_cost) SELECT ROUND(box_cost, 4) AS box_cost, ROUND(quant.main.box_spread_rate(box_cost, 90, 110, 0.5), 4) AS box_rate FROM legs"
+    success_criteria: "Returns a box cost of about 19.5062 and an implied rate of 0.05 (the box recovers the Black-Scholes input rate)."
+    ignore_column_names: true
+  - name: tbill_discounted_payment
+    reference_sql: "SELECT ROUND(quant.main.present_value(1000000, quant.main.tbill_rate(0.0412, 91), 91 / 365.0), 2) AS pv"
+    success_criteria: "Returns about 989585.56, i.e. 1,000,000 * (1 - 0.0412 * 91 / 360)."
+    ignore_column_names: true

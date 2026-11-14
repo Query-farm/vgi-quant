@@ -32,6 +32,7 @@ from vgi import Worker
 from vgi.catalog import Catalog, Schema
 
 from vgi_quant.carry import CARRY_FUNCTIONS
+from vgi_quant.composed_examples import COMPOSED_EXAMPLES
 from vgi_quant.scalars import SCALAR_FUNCTIONS
 from vgi_quant.tables import TABLE_FUNCTIONS, TABLES
 
@@ -173,6 +174,8 @@ _SCHEMA_EXAMPLE_QUERIES = json.dumps(
                 " - quant.main.implied_carry_rate(4000, 4050, 0.25), 4) AS net_carry"
             ),
         },
+        # Composed queries chaining several functions (defined once in composed_examples).
+        *({"description": d, "sql": s} for d, s in COMPOSED_EXAMPLES),
     ]
 )
 
@@ -371,6 +374,25 @@ _AGENT_TEST_TASKS = json.dumps(
                 "Convert a 5% simple annual rate over 0.5 years to its continuously compounded "
                 "equivalent, and convert a 5% continuously compounded rate to a simple rate over "
                 "0.5 years. Return both, each rounded to 4 decimal places."
+            ),
+        },
+        {
+            "name": "box_from_black_scholes_legs",
+            "prompt": (
+                "Build a European box spread on a stock at spot 100 from four Black-Scholes legs "
+                "(long 90 call, short 110 call, long 110 put, short 90 put), each priced with "
+                "rate 0.05, volatility 0.20 and 0.5 years to expiry. Return two columns: the "
+                "box's cost rounded to 4 decimal places, then the continuously compounded annual "
+                "rate that buying the box at that cost lends at, rounded to 4 decimal places."
+            ),
+        },
+        {
+            "name": "tbill_discounted_payment",
+            "prompt": (
+                "A 91-day Treasury bill is quoted at a 4.12% bank-discount yield. Convert that "
+                "quote to a continuously compounded annual rate and use it to discount a "
+                "payment of 1,000,000 due in 91 days (time measured as 91/365 years). Return "
+                "one column: the present value rounded to 2 decimal places."
             ),
         },
         {

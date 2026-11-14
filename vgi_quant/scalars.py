@@ -5,7 +5,7 @@ value out -- so it can be used inline in any projection or predicate:
 
     SELECT bs_price(spot, strike, 0.05, vol, ttm, 'call')  FROM options;
     SELECT id, bond_price(100, 0.05, ytm, 10, 2)           FROM bonds;
-    SELECT year_fraction(start, end, 'ACT/360')            FROM accruals;
+    SELECT year_fraction(start_date, end_date, 'ACT/360')  FROM accruals;
 
 A note on argument syntax
 -------------------------
@@ -28,6 +28,7 @@ in :mod:`vgi_quant.tables`.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Callable, Sequence
 from datetime import date
 from typing import Annotated, Any
@@ -37,6 +38,7 @@ from vgi.arguments import ConstParam, Param, Returns
 from vgi.scalar_function import ScalarFunction
 
 from . import quant
+from .composed_examples import BOND_SHOCK_APPROX, CALL_BOOK_VALUE, COUPON_SCHEDULE_PV, IV_SKEW_TO_DELTA
 from .meta import object_tags
 
 _F64 = pa.float64()
@@ -45,19 +47,30 @@ _F64 = pa.float64()
 # `sql` is self-contained and re-runnable against an attached `quant` worker; we
 # omit `expected_result` (the linter only requires clean execution, and pinning
 # exact floating-point output is brittle). Attached to a representative object.
-_YEAR_FRACTION_EXECUTABLE_EXAMPLES = (
-    "["
-    '{"description": "Black-Scholes price of an at-the-money 1y European call.",'
-    ' "sql": "SELECT quant.main.bs_price(100, 100, 0.05, 0.2, 1, \'call\') AS price"},'
-    '{"description": "Recover implied volatility from a Black-Scholes call price.",'
-    ' "sql": "SELECT quant.main.implied_vol(10.45, 100, 100, 0.05, 1, \'call\') AS iv"},'
-    '{"description": "Clean price of a 10y semiannual par bond.",'
-    ' "sql": "SELECT quant.main.bond_price(100, 0.05, 0.05, 10, 2) AS clean_price"},'
-    '{"description": "Year fraction of a half-year span under ACT/360.",'
-    " \"sql\": \"SELECT quant.main.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360') AS yf\"},"
-    '{"description": "List the supported day-count conventions.",'
-    ' "sql": "SELECT name FROM quant.main.day_count_conventions() ORDER BY name"}'
-    "]"
+_YEAR_FRACTION_EXECUTABLE_EXAMPLES = json.dumps(
+    [
+        {
+            "description": "Black-Scholes price of an at-the-money 1y European call.",
+            "sql": "SELECT quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'call') AS price",
+        },
+        {
+            "description": "Recover implied volatility from a Black-Scholes call price.",
+            "sql": "SELECT quant.main.implied_vol(10.45, 100, 100, 0.05, 1, 'call') AS iv",
+        },
+        {
+            "description": "Clean price of a 10y semiannual par bond.",
+            "sql": "SELECT quant.main.bond_price(100, 0.05, 0.05, 10, 2) AS clean_price",
+        },
+        {
+            "description": "Year fraction of a half-year span under ACT/360.",
+            "sql": "SELECT quant.main.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360') AS yf",
+        },
+        {
+            "description": "List the supported day-count conventions.",
+            "sql": "SELECT name FROM quant.main.day_count_conventions() ORDER BY name",
+        },
+        {"description": BOND_SHOCK_APPROX[0], "sql": BOND_SHOCK_APPROX[1]},
+    ]
 )
 
 
@@ -187,6 +200,7 @@ BsPriceFunction = _make_option_scalar(
             "Price the matching European put (same spot, strike, rate, vol, maturity).",
             "SELECT quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'put') AS put_price",
         ),
+        CALL_BOOK_VALUE,
     ],
     title="Black-Scholes Option Price",
     doc_llm=(
@@ -502,6 +516,7 @@ class ImpliedVolFunction(ScalarFunction):
                     "SELECT quant.main.implied_vol("
                     "quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'call'), 100, 100, 0.05, 1, 'call') AS iv",
                 ),
+                IV_SKEW_TO_DELTA,
             ],
         )
 
@@ -813,6 +828,7 @@ class BondConvexityFunction(ScalarFunction):
                     "Convexity of a 10-year 5% semiannual par bond; near 73.65 and positive.",
                     "SELECT quant.main.bond_convexity(100, 0.05, 0.05, 10, 2) AS convexity",
                 ),
+                BOND_SHOCK_APPROX,
             ],
         )
 
@@ -1030,6 +1046,7 @@ class PresentValueFunction(ScalarFunction):
                     "Present value of 1000 due in two years at 5% is 1000 * exp(-0.10) (~904.84).",
                     "SELECT quant.main.present_value(1000, 0.05, 2) AS pv",
                 ),
+                COUPON_SCHEDULE_PV,
             ],
         )
 

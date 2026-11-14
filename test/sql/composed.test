@@ -1,0 +1,67 @@
+# name: test/sql/composed.test
+# description: composed example queries (vgi_quant/composed_examples.py), AI-task reference SQL, README snippets
+# group: [vgi_quant]
+
+require-env VGI_QUANT_WORKER
+
+statement ok
+LOAD vgi;
+
+statement ok
+ATTACH 'quant' AS quant (TYPE vgi, LOCATION '{VGI_QUANT_WORKER}');
+
+# IV_SKEW_TO_DELTA: implied_vol feeding bs_delta.
+query III
+WITH quotes(strike, price) AS (VALUES (90, 14.50), (100, 8.20), (110, 3.90)), smile AS (SELECT strike, quant.main.implied_vol(price, 100, strike, 0.05, 0.5, 'call') AS iv FROM quotes) SELECT strike, ROUND(iv, 4) AS iv, ROUND(quant.main.bs_delta(100, strike, 0.05, iv, 0.5, 'call'), 4) AS delta FROM smile ORDER BY strike
+----
+90	0.2531	0.7933
+100	0.2478	0.5911
+110	0.2378	0.3692
+
+# CALL_BOOK_VALUE
+query II
+WITH book(qty, strike, expiry) AS (VALUES (10, 100, DATE '2026-09-18'), (-10, 110, DATE '2026-09-18'), (5, 100, DATE '2026-12-18')), priced AS (SELECT qty, strike, quant.main.year_fraction(DATE '2026-06-15', expiry, 'ACT/365') AS ttm FROM book) SELECT ROUND(SUM(qty * quant.main.bs_price(100, strike, 0.05, 0.2, ttm, 'call')), 4) AS book_value, ROUND(SUM(qty * quant.main.bs_delta(100, strike, 0.05, 0.2, ttm, 'call')), 4) AS book_delta FROM priced
+----
+69.4256	6.4522
+
+# BOND_SHOCK_APPROX
+query III
+WITH base AS (SELECT quant.main.bond_price(100, 0.05, 0.05, 10, 2) AS p0, quant.main.bond_duration(100, 0.05, 0.05, 10, 2) AS dur, quant.main.bond_convexity(100, 0.05, 0.05, 10, 2) AS cvx) SELECT ROUND(quant.main.bond_price(100, 0.05, 0.06, 10, 2) - p0, 4) AS actual_change, ROUND(-p0 * dur * 0.01, 4) AS duration_estimate, ROUND(p0 * (-dur * 0.01 + 0.5 * cvx * 0.0001), 4) AS duration_convexity_estimate FROM base
+----
+-7.4396	-7.7955	-7.4273
+
+# COUPON_SCHEDULE_PV
+query I
+SELECT ROUND(SUM(quant.main.present_value(CASE WHEN n = 4 THEN 102.5 ELSE 2.5 END, 0.045, quant.main.year_fraction(DATE '2026-06-15', CAST(DATE '2026-06-15' + to_months(6 * n) AS DATE), 'ACT/365'))), 4) AS pv FROM range(1, 5) AS t(n)
+----
+100.8373
+
+# AI task box_from_black_scholes_legs reference SQL.
+query II
+WITH legs AS (SELECT quant.main.bs_price(100, 90, 0.05, 0.2, 0.5, 'call') - quant.main.bs_price(100, 110, 0.05, 0.2, 0.5, 'call') + quant.main.bs_price(100, 110, 0.05, 0.2, 0.5, 'put') - quant.main.bs_price(100, 90, 0.05, 0.2, 0.5, 'put') AS box_cost) SELECT ROUND(box_cost, 4) AS box_cost, ROUND(quant.main.box_spread_rate(box_cost, 90, 110, 0.5), 4) AS box_rate FROM legs
+----
+19.5062	0.05
+
+# AI task tbill_discounted_payment reference SQL; equals the bank-discount price.
+query II
+SELECT ROUND(quant.main.present_value(1000000, quant.main.tbill_rate(0.0412, 91), 91 / 365.0), 2) AS pv, ROUND(1000000 * (1 - 0.0412 * 91 / 360), 2)
+----
+989585.56	989585.56
+
+# README "Combining functions" snippet (catalog.function form).
+query III
+WITH quotes(strike, price) AS (VALUES (90, 14.50), (100, 8.20), (110, 3.90)), smile AS (SELECT strike, quant.implied_vol(price, 100, strike, 0.05, 0.5, 'call') AS iv FROM quotes) SELECT strike, ROUND(iv, 4) AS iv, ROUND(quant.bs_delta(100, strike, 0.05, iv, 0.5, 'call'), 4) AS delta FROM smile ORDER BY strike
+----
+90	0.2531	0.7933
+100	0.2478	0.5911
+110	0.2378	0.3692
+
+# README scalar-form snippet with date columns (start_date/end_date, not the reserved word end).
+query I
+WITH accruals(start_date, end_date) AS (VALUES (DATE '2026-01-01', DATE '2026-07-01')) SELECT ROUND(quant.year_fraction(start_date, end_date, 'ACT/360'), 4) FROM accruals
+----
+0.5028
+
+statement error
+WITH accruals(start, "end") AS (VALUES (DATE '2026-01-01', DATE '2026-07-01')) SELECT quant.year_fraction(start, end, 'ACT/360') FROM accruals
+----

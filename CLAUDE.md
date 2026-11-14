@@ -23,6 +23,7 @@ vgi_quant/
   scalars.py           per-row scalars (options/bonds/conventions)
   carry.py             per-row carry scalars (implied financing rates; math in quant.py)
   tables.py            discovery table function: day_count_conventions
+  composed_examples.py multi-function example SQL, defined once; used by worker.py + scalars.py, rows pinned in test/sql/composed.test
   schema_utils.py      pa.Field comment / column-doc helper
 tests/                 pytest: test_quant (pure), test_tables (in-proc), test_scalars (Client RPC)
 test/sql/*.test        haybarn-unittest sqllogictest — authoritative E2E

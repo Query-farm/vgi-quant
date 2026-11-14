@@ -85,7 +85,7 @@ The split follows what the VGI SDK allows for each function shape:
   ```sql
   SELECT id, bs_price(spot, strike, 0.05, vol, ttm, 'call') FROM positions;
   SELECT bond_yield(price, 100, 0.05, 10, 2)                 FROM holdings;
-  SELECT year_fraction(start, end, 'ACT/360')               FROM accruals;
+  SELECT year_fraction(start_date, end_date, 'ACT/360')     FROM accruals;
   ```
 
 * **Table functions** return *many* rows. Here, one discovery function:
@@ -152,6 +152,25 @@ non-positive spot/strike/face/price, an unknown `opt_type` / `convention` /
 * **Day-count** `year_fraction` supports `ACT/360`, `ACT/365`, `30/360`
   (US bond basis) and `ACT/ACT` (ISDA). `discount_factor` / `present_value` use
   continuous compounding.
+
+## Combining functions
+
+Because every answer is a scalar, one function's output can feed another. Here
+quoted prices go through `implied_vol`, and each strike is then hedged at its
+own implied vol with `bs_delta`:
+
+```sql
+WITH quotes(strike, price) AS (VALUES (90, 14.50), (100, 8.20), (110, 3.90)),
+smile AS (
+  SELECT strike, quant.implied_vol(price, 100, strike, 0.05, 0.5, 'call') AS iv
+  FROM quotes
+)
+SELECT strike,
+       ROUND(iv, 4)                                                AS iv,    -- 0.2531, 0.2478, 0.2378
+       ROUND(quant.bs_delta(100, strike, 0.05, iv, 0.5, 'call'), 4) AS delta -- 0.7933, 0.5911, 0.3692
+FROM smile
+ORDER BY strike;
+```
 
 ## Carry: comparing financing rates
 
