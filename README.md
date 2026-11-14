@@ -234,3 +234,7 @@ Written by [Query.Farm](https://query.farm).
 
 Copyright 2026 Query Farm LLC - https://query.farm
 
+
+## SQL notebook
+
+See the [executed quant walkthrough](notebooks/README.md) for local Greeks, full option repricing and approximation errors, with a reproducible notebook environment.

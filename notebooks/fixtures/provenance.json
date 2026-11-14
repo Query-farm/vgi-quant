@@ -1,0 +1,12 @@
+{
+  "source": "Entirely synthetic model inputs and deterministic SQL scenario grid; no observed prices or positions.",
+  "spot": 100.0,
+  "strike": 100.0,
+  "continuous_annual_rate": 0.03,
+  "annual_volatility": 0.2,
+  "time_to_expiry_years": 0.5,
+  "type": "European call; no dividends",
+  "units": "Consistent unspecified quote-currency units per one underlying unit; no contract multiplier.",
+  "clock": "No market timestamp; 0.5 is an exact model horizon in years, not a dated maturity.",
+  "grid": "Spot shocks spaced 0.5 percentage points; selected symmetric extent is the notebook parameter."
+}
