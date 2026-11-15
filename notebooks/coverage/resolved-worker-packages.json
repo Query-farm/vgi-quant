@@ -1,0 +1,7 @@
+{
+  "vgi-quant": "0.5.0",
+  "vgi-python": "0.51.1",
+  "vgi-rpc": "0.53.1",
+  "QuantLib": "1.44",
+  "pyarrow": "26.0.1"
+}

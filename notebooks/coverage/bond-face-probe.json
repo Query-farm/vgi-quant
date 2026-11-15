@@ -1,0 +1,18 @@
+{
+  "query": "SELECT face,quant.main.bond_price(face,0.05,0.05,10,2) AS clean_price FROM (VALUES(100.0),(1000.0)) t(face)",
+  "captured_at": "2026-11-15T01:24:29.100057+00:00",
+  "columns": [
+    "face",
+    "clean_price"
+  ],
+  "rows": [
+    [
+      "100.0",
+      99.99992019422427
+    ],
+    [
+      "1000.0",
+      99.99992019422425
+    ]
+  ]
+}

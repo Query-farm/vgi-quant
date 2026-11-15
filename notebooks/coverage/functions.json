@@ -1,0 +1,977 @@
+{
+  "query": "SELECT * FROM duckdb_functions() WHERE database_name='quant' ORDER BY schema_name,function_name",
+  "captured_at": "2026-11-15T01:24:29.069667+00:00",
+  "columns": [
+    "database_name",
+    "database_oid",
+    "schema_name",
+    "function_name",
+    "alias_of",
+    "function_type",
+    "description",
+    "comment",
+    "tags",
+    "return_type",
+    "parameters",
+    "parameter_types",
+    "varargs",
+    "macro_definition",
+    "has_side_effects",
+    "internal",
+    "extension_name",
+    "function_oid",
+    "examples",
+    "stability",
+    "categories"
+  ],
+  "rows": [
+    [
+      "quant",
+      "22595",
+      "main",
+      "bond_convexity",
+      null,
+      "scalar",
+      "Convexity of a fixed-rate bond at a given yield",
+      null,
+      {
+        "vgi.category": "bonds",
+        "vgi.doc_llm": "## bond_convexity\n\nCompute the **convexity** of a fixed-rate bond at a given yield -- the second-order sensitivity of price to yield that refines the duration estimate.\n\n**Signature:** `bond_convexity(face, coupon_rate, yield_rate, years, freq)` -- same inputs as `bond_price`; `freq` is the literal coupon frequency (`1`/`2`/`4`/`12`).\n\n**Output:** convexity as a `DOUBLE` (positive for plain bonds). Combine with `bond_duration` for a second-order price-change approximation under large yield moves. NULL in -> NULL out; invalid inputs raise.",
+        "vgi.doc_md": "# Fixed-Rate Bond Convexity\n\nConvexity -- second-order price sensitivity to yield.\n\n## Usage\n\n```sql\nSELECT quant.bond_convexity(100, 0.05, 0.05, 10, 2);  -- ~73.65\n```\n\n## Notes\n\n- Positive for plain vanilla bonds.\n- Refines the duration-based price-change estimate.\n- Larger for longer maturities and lower coupons.",
+        "vgi.example_queries": "[{\"description\": \"Convexity of a 10-year 5% semiannual par bond; near 73.65 and positive.\", \"sql\": \"SELECT quant.main.bond_convexity(100, 0.05, 0.05, 10, 2) AS convexity\"}]",
+        "vgi.keywords": "[\"bond\", \"convexity\", \"interest rate risk\", \"second order\", \"fixed income\", \"bond_convexity\"]",
+        "vgi.title": "Fixed-Rate Bond Convexity"
+      },
+      "DOUBLE",
+      [
+        "face",
+        "coupon_rate",
+        "yield_rate",
+        "years",
+        "freq"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "BIGINT"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22599,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "bonds"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "bond_duration",
+      null,
+      "scalar",
+      "Modified duration of a fixed-rate bond at a given yield",
+      null,
+      {
+        "vgi.category": "bonds",
+        "vgi.doc_llm": "## bond_duration\n\nCompute the **modified duration** of a fixed-rate bond at a given yield -- the first-order sensitivity of price to yield, in years.\n\n**Signature:** `bond_duration(face, coupon_rate, yield_rate, years, freq)` -- same inputs as `bond_price`; `freq` is the literal coupon frequency (`1`/`2`/`4`/`12`).\n\n**Output:** modified duration in years as a `DOUBLE`. A 1% (100 bp) yield rise drops price by roughly `duration%`. Duration is less than maturity for a coupon bond. NULL in -> NULL out; invalid inputs raise.",
+        "vgi.doc_md": "# Fixed-Rate Bond Modified Duration\n\nModified duration -- price sensitivity to yield, in years.\n\n## Usage\n\n```sql\nSELECT quant.bond_duration(100, 0.05, 0.05, 10, 2);  -- ~7.80\n```\n\n## Notes\n\n- Modified (not Macaulay) duration.\n- A 1% yield rise drops price by roughly `duration%`.\n- Always less than maturity for a coupon-paying bond.",
+        "vgi.example_queries": "[{\"description\": \"Modified duration (years) of a 10-year 5% semiannual par bond; near 7.8.\", \"sql\": \"SELECT quant.main.bond_duration(100, 0.05, 0.05, 10, 2) AS modified_duration\"}, {\"description\": \"Estimate the price drop from a 100 bp yield rise: -duration * 0.01 * price.\", \"sql\": \"SELECT -quant.main.bond_duration(100, 0.05, 0.05, 10, 2) * 0.01 * 100 AS approx_price_change\"}]",
+        "vgi.keywords": "[\"bond\", \"modified duration\", \"interest rate risk\", \"sensitivity\", \"fixed income\", \"bond_duration\"]",
+        "vgi.title": "Fixed-Rate Bond Modified Duration"
+      },
+      "DOUBLE",
+      [
+        "face",
+        "coupon_rate",
+        "yield_rate",
+        "years",
+        "freq"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "BIGINT"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22600,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "bonds"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "bond_price",
+      null,
+      "scalar",
+      "Clean price of a fixed-rate bond at a given yield (par bond prices to face)",
+      null,
+      {
+        "vgi.category": "bonds",
+        "vgi.doc_llm": "## bond_price\n\nCompute the **clean** price of a fixed-rate coupon bond at a given yield.\n\n**Signature:** `bond_price(face, coupon_rate, yield_rate, years, freq)` -- `face` is par value (> 0); `coupon_rate` and `yield_rate` are annual decimals (e.g. `0.05`); `years` is whole years to maturity (> 0); `freq` is the **literal** coupon frequency (`1`=annual, `2`=semiannual, `4`=quarterly, `12`=monthly).\n\n**Output:** clean price as a `DOUBLE`. A par bond (coupon == yield) prices to ~`face`. Inverse of `bond_yield`. NULL in -> NULL out; `years <= 0` or an unknown `freq` raise.",
+        "vgi.doc_md": "# Fixed-Rate Bond Price\n\nClean price of a fixed-rate bond given its yield to maturity.\n\n## Usage\n\n```sql\nSELECT quant.bond_price(100, 0.05, 0.05, 10, 2);  -- ~100 (par)\n```\n\n## Notes\n\n- `freq` must be a literal `1`, `2`, `4`, or `12`.\n- Uses ActualActual(ISDA), compounded at the coupon frequency.\n- A par bond (coupon == yield) prices to face value.",
+        "vgi.example_queries": "[{\"description\": \"Clean price of a 10-year 5% semiannual par bond (coupon == yield) is 100.\", \"sql\": \"SELECT quant.main.bond_price(100, 0.05, 0.05, 10, 2) AS clean_price\"}, {\"description\": \"When yield exceeds the coupon the bond trades at a discount (price < face).\", \"sql\": \"SELECT quant.main.bond_price(100, 0.05, 0.07, 10, 2) AS discount_price\"}]",
+        "vgi.keywords": "[\"bond\", \"fixed-rate bond\", \"clean price\", \"present value\", \"coupon\", \"fixed income\", \"bond_price\"]",
+        "vgi.title": "Fixed-Rate Bond Price"
+      },
+      "DOUBLE",
+      [
+        "face",
+        "coupon_rate",
+        "yield_rate",
+        "years",
+        "freq"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "BIGINT"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22601,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "bonds"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "bond_yield",
+      null,
+      "scalar",
+      "Yield to maturity implied by a clean bond price (inverse of bond_price)",
+      null,
+      {
+        "vgi.category": "bonds",
+        "vgi.doc_llm": "## bond_yield\n\nSolve for the **yield to maturity** implied by a clean bond price -- the inverse of `bond_price`.\n\n**Signature:** `bond_yield(price, face, coupon_rate, years, freq)` -- `price` is the observed clean price (> 0); `face` is par (> 0); `coupon_rate` is the annual decimal coupon; `years` is whole years; `freq` is the **literal** coupon frequency (`1`/`2`/`4`/`12`).\n\n**Output:** annual yield to maturity as a `DOUBLE` (e.g. `0.05` for 5%). Use it to convert a quoted price into a comparable yield. NULL in -> NULL out; invalid inputs raise.",
+        "vgi.doc_md": "# Fixed-Rate Bond Yield\n\nYield to maturity implied by a clean bond price.\n\n## Usage\n\n```sql\nSELECT quant.bond_yield(100, 100, 0.05, 10, 2);  -- ~0.05\n```\n\n## Notes\n\n- Argument order is `(price, face, coupon_rate, years, freq)`.\n- Inverts `bond_price`: feed its output to recover the yield.\n- `freq` must be a literal `1`, `2`, `4`, or `12`.",
+        "vgi.example_queries": "[{\"description\": \"Yield to maturity of a 10-year 5% semiannual bond quoted at par (100) is ~0.05.\", \"sql\": \"SELECT quant.main.bond_yield(100, 100, 0.05, 10, 2) AS ytm\"}, {\"description\": \"A price below par implies a yield above the 5% coupon.\", \"sql\": \"SELECT quant.main.bond_yield(95, 100, 0.05, 10, 2) AS ytm\"}]",
+        "vgi.keywords": "[\"bond\", \"yield to maturity\", \"ytm\", \"fixed income\", \"invert price\", \"coupon\", \"bond_yield\"]",
+        "vgi.title": "Fixed-Rate Bond Yield"
+      },
+      "DOUBLE",
+      [
+        "price",
+        "face",
+        "coupon_rate",
+        "years",
+        "freq"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "BIGINT"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22602,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "bonds"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "box_spread_rate",
+      null,
+      "scalar",
+      "Annual rate implied by a European box spread: ln((high-low)/box_price)/ttm",
+      null,
+      {
+        "vgi.category": "carry",
+        "vgi.doc_llm": "## box_spread_rate\n\nThe lending/borrowing rate implied by a European box spread. A box is long a call and short a put at `low_strike` plus short a call and long a put at `high_strike`; it pays `high_strike - low_strike` at expiry regardless of the underlying, so it is a zero-coupon loan.\n\n**Signature:** `box_spread_rate(box_price, low_strike, high_strike, ttm)`. `box_price` is the net cost of the four legs: `call(low) - call(high) + put(high) - put(low)`, in the same units as the strikes (not multiplied by the contract multiplier).\n\n**Use:** buying a box lends at this rate; selling one borrows at it. Compare with `tbill_rate` and `implied_carry_rate`. Only European-style options (e.g. SPX) are safe from early assignment.\n\n**Output:** a `DOUBLE` continuously compounded annual rate (0.05 = 5%/yr). NULL in -> NULL out.",
+        "vgi.doc_md": "# Box Spread Rate\n\nImplied rate of a European box spread.\n\n```sql\nSELECT quant.box_spread_rate(989, 5000, 6000, 0.25);  -- ~0.0442\n```\n\n- `box_price = call(low) - call(high) + put(high) - put(low)`.\n- Use European-exercise options; American legs can be assigned early.",
+        "vgi.example_queries": "[{\"description\": \"A 1000-wide SPX box costing 989 with 3 months left lends at ~4.42%/yr.\", \"sql\": \"SELECT ROUND(quant.main.box_spread_rate(989, 5000, 6000, 0.25), 4) AS box_rate\"}, {\"description\": \"Price the box from its four legs, then take its rate.\", \"sql\": \"SELECT ROUND(quant.main.box_spread_rate(c_lo - c_hi + p_hi - p_lo, 5000, 6000, 0.25), 4) AS box_rate FROM (VALUES (1050.0, 210.0, 160.0, 11.0)) l(c_lo, c_hi, p_hi, p_lo)\"}]",
+        "vgi.keywords": "[\"box spread\", \"synthetic loan\", \"options financing\", \"spx box\", \"implied rate\"]",
+        "vgi.title": "Box Spread Rate"
+      },
+      "DOUBLE",
+      [
+        "box_price",
+        "low_strike",
+        "high_strike",
+        "ttm"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22603,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "carry"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "bs_delta",
+      null,
+      "scalar",
+      "Black-Scholes delta d(value)/d(spot) of a European option",
+      null,
+      {
+        "vgi.category": "options",
+        "vgi.doc_llm": "## bs_delta\n\nFirst-order Greek: the sensitivity of a European option's value to the underlying spot price, `d(value)/d(spot)`.\n\n**Signature:** `bs_delta(spot, strike, rate, vol, ttm, opt_type)` -- same arguments as `bs_price`; `opt_type` is the literal `'call'`/`'put'`.\n\n**Output:** a unitless `DOUBLE` in roughly `[0, 1]` for calls and `[-1, 0]` for puts. Use it for hedge ratios and directional exposure. NULL in -> NULL out; invalid inputs raise.",
+        "vgi.doc_md": "# Black-Scholes Option Delta\n\nDelta -- the rate of change of option value with respect to spot.\n\n## Usage\n\n```sql\nSELECT quant.bs_delta(100, 100, 0.05, 0.2, 1, 'call');  -- ~0.637\n```\n\n## Notes\n\n- Calls have positive delta (0..1); puts negative (-1..0).\n- Commonly used as a hedge ratio against the underlying.",
+        "vgi.example_queries": "[{\"description\": \"Delta (hedge ratio) of an at-the-money 1-year European call; near 0.64.\", \"sql\": \"SELECT quant.main.bs_delta(100, 100, 0.05, 0.2, 1, 'call') AS call_delta\"}, {\"description\": \"Delta of the matching European put is negative (call delta minus 1).\", \"sql\": \"SELECT quant.main.bs_delta(100, 100, 0.05, 0.2, 1, 'put') AS put_delta\"}]",
+        "vgi.keywords": "[\"black-scholes\", \"delta\", \"greeks\", \"hedge ratio\", \"option sensitivity\", \"spot\", \"bs_delta\"]",
+        "vgi.title": "Black-Scholes Option Delta"
+      },
+      "DOUBLE",
+      [
+        "spot",
+        "strike",
+        "rate",
+        "vol",
+        "ttm",
+        "opt_type"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22604,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "options"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "bs_gamma",
+      null,
+      "scalar",
+      "Black-Scholes gamma d2(value)/d(spot)2 of a European option",
+      null,
+      {
+        "vgi.category": "options",
+        "vgi.doc_llm": "## bs_gamma\n\nSecond-order Greek: the rate of change of delta with respect to spot, `d2(value)/d(spot)2`.\n\n**Signature:** `bs_gamma(spot, strike, rate, vol, ttm, opt_type)`.\n\nGamma is identical for a call and the matching put. It is largest at-the-money near expiry and measures how quickly a delta hedge must be rebalanced. Output is `DOUBLE`. NULL in -> NULL out; invalid inputs raise.",
+        "vgi.doc_md": "# Black-Scholes Option Gamma\n\nGamma -- the curvature of option value in spot (rate of change of delta).\n\n## Usage\n\n```sql\nSELECT quant.bs_gamma(100, 100, 0.05, 0.2, 1, 'call');\n```\n\n## Notes\n\n- Equal for a call and its matching put.\n- Peaks at-the-money and as expiry approaches.",
+        "vgi.example_queries": "[{\"description\": \"Gamma of an at-the-money 1-year European call (identical for the put).\", \"sql\": \"SELECT quant.main.bs_gamma(100, 100, 0.05, 0.2, 1, 'call') AS gamma\"}]",
+        "vgi.keywords": "[\"black-scholes\", \"gamma\", \"greeks\", \"convexity\", \"delta change\", \"option sensitivity\", \"bs_gamma\"]",
+        "vgi.title": "Black-Scholes Option Gamma"
+      },
+      "DOUBLE",
+      [
+        "spot",
+        "strike",
+        "rate",
+        "vol",
+        "ttm",
+        "opt_type"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22605,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "options"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "bs_price",
+      null,
+      "scalar",
+      "Black-Scholes price of a European option ('call'|'put')",
+      null,
+      {
+        "vgi.category": "options",
+        "vgi.doc_llm": "## bs_price\n\nCompute the analytic **Black-Scholes** fair value of a European option.\n\n**Signature:** `bs_price(spot, strike, rate, vol, ttm, opt_type)`\n\n**Inputs:** `spot` and `strike` are prices (> 0); `rate` is the continuously-compounded annual risk-free rate; `vol` is annualized volatility (>= 0, e.g. `0.2` for 20%); `ttm` is time to maturity in years (> 0); `opt_type` is the **literal** `'call'` or `'put'`.\n\n**Output:** a `DOUBLE` option premium in the same currency as `spot`.\n\nUse this when you need a theoretical option premium per row. There is no dividend yield (carry equals `rate`). Any NULL input yields NULL; `ttm <= 0`, negative `vol`, non-positive `spot`/`strike`, or an unknown `opt_type` raise a clear error. Pair with `implied_vol` to invert a market price back to volatility.",
+        "vgi.doc_md": "# Black-Scholes Option Price\n\nPrices a European option with the closed-form Black-Scholes model.\n\n## Usage\n\n```sql\nSELECT quant.bs_price(100, 100, 0.05, 0.2, 1, 'call');  -- ~10.45\n```\n\n## Notes\n\n- `opt_type` must be a literal `'call'` or `'put'`.\n- No dividend yield is modeled; carry equals the risk-free `rate`.\n- At-the-money 1y example above returns roughly `10.4506`.",
+        "vgi.example_queries": "[{\"description\": \"Black-Scholes fair value of an at-the-money 1-year European call.\", \"sql\": \"SELECT quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'call') AS call_price\"}, {\"description\": \"Price the matching European put (same spot, strike, rate, vol, maturity).\", \"sql\": \"SELECT quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'put') AS put_price\"}]",
+        "vgi.keywords": "[\"black-scholes\", \"option price\", \"european option\", \"call\", \"put\", \"premium\", \"derivatives\", \"bs_price\"]",
+        "vgi.title": "Black-Scholes Option Price"
+      },
+      "DOUBLE",
+      [
+        "spot",
+        "strike",
+        "rate",
+        "vol",
+        "ttm",
+        "opt_type"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22606,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "options"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "bs_rho",
+      null,
+      "scalar",
+      "Black-Scholes rho d(value)/d(rate), per 1.00 of the rate",
+      null,
+      {
+        "vgi.category": "options",
+        "vgi.doc_llm": "## bs_rho\n\nSensitivity of a European option's value to the risk-free interest rate, `d(value)/d(rate)`, expressed **per 1.00 of the rate** (per 100%).\n\n**Signature:** `bs_rho(spot, strike, rate, vol, ttm, opt_type)`.\n\nDivide by 100 for rho per 1% rate move. Calls have positive rho, puts negative. Output is `DOUBLE`. NULL in -> NULL out; invalid inputs raise.",
+        "vgi.doc_md": "# Black-Scholes Option Rho\n\nRho -- sensitivity of option value to the interest rate, per 1.00 rate.\n\n## Usage\n\n```sql\nSELECT quant.bs_rho(100, 100, 0.05, 0.2, 1, 'call');\n```\n\n## Notes\n\n- Per 1.00 rate; divide by 100 for per-1% rho.\n- Positive for calls, negative for puts.",
+        "vgi.example_queries": "[{\"description\": \"Rho (per 1.00 rate) of an at-the-money 1-year European call; positive.\", \"sql\": \"SELECT quant.main.bs_rho(100, 100, 0.05, 0.2, 1, 'call') AS call_rho\"}, {\"description\": \"The matching European put has negative rho.\", \"sql\": \"SELECT quant.main.bs_rho(100, 100, 0.05, 0.2, 1, 'put') AS put_rho\"}]",
+        "vgi.keywords": "[\"black-scholes\", \"rho\", \"greeks\", \"interest rate sensitivity\", \"rate\", \"option sensitivity\", \"bs_rho\"]",
+        "vgi.title": "Black-Scholes Option Rho"
+      },
+      "DOUBLE",
+      [
+        "spot",
+        "strike",
+        "rate",
+        "vol",
+        "ttm",
+        "opt_type"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22607,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "options"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "bs_theta",
+      null,
+      "scalar",
+      "Black-Scholes theta d(value)/d(t), per year",
+      null,
+      {
+        "vgi.category": "options",
+        "vgi.doc_llm": "## bs_theta\n\nTime decay: the rate of change of a European option's value as time passes, `d(value)/d(t)`, expressed **per year**.\n\n**Signature:** `bs_theta(spot, strike, rate, vol, ttm, opt_type)`.\n\nDivide by 365 for theta per calendar day. Theta is typically negative for long option positions (value erodes toward expiry). Output is `DOUBLE`. NULL in -> NULL out; invalid inputs raise.",
+        "vgi.doc_md": "# Black-Scholes Option Theta\n\nTheta -- option time decay, expressed per year.\n\n## Usage\n\n```sql\nSELECT quant.bs_theta(100, 100, 0.05, 0.2, 1, 'call');\n```\n\n## Notes\n\n- Per year; divide by 365 for per-day theta.\n- Usually negative for long options.",
+        "vgi.example_queries": "[{\"description\": \"Theta (per year) of an at-the-money 1-year European call; negative.\", \"sql\": \"SELECT quant.main.bs_theta(100, 100, 0.05, 0.2, 1, 'call') AS theta\"}, {\"description\": \"Convert to per-calendar-day time decay by dividing by 365.\", \"sql\": \"SELECT quant.main.bs_theta(100, 100, 0.05, 0.2, 1, 'call') / 365 AS theta_per_day\"}]",
+        "vgi.keywords": "[\"black-scholes\", \"theta\", \"greeks\", \"time decay\", \"time value\", \"option sensitivity\", \"bs_theta\"]",
+        "vgi.title": "Black-Scholes Option Theta"
+      },
+      "DOUBLE",
+      [
+        "spot",
+        "strike",
+        "rate",
+        "vol",
+        "ttm",
+        "opt_type"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22608,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "options"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "bs_vega",
+      null,
+      "scalar",
+      "Black-Scholes vega d(value)/d(vol), per 1.00 of volatility",
+      null,
+      {
+        "vgi.category": "options",
+        "vgi.doc_llm": "## bs_vega\n\nSensitivity of a European option's value to volatility, `d(value)/d(vol)`, expressed **per 1.00 of volatility** (i.e. per 100%).\n\n**Signature:** `bs_vega(spot, strike, rate, vol, ttm, opt_type)`.\n\nDivide the result by 100 to get the more common per-1%-vol vega. Vega is equal for a call and its matching put and is largest at-the-money. Output is `DOUBLE`. NULL in -> NULL out; invalid inputs raise.",
+        "vgi.doc_md": "# Black-Scholes Option Vega\n\nVega -- sensitivity of option value to volatility, per 1.00 (100%) vol.\n\n## Usage\n\n```sql\nSELECT quant.bs_vega(100, 100, 0.05, 0.2, 1, 'call');  -- ~37.52\n```\n\n## Notes\n\n- Per 1.00 vol; divide by 100 for per-1% vega.\n- Equal for a call and its matching put.",
+        "vgi.example_queries": "[{\"description\": \"Vega (per 1.00 vol) of an at-the-money 1-year European call; near 37.52.\", \"sql\": \"SELECT quant.main.bs_vega(100, 100, 0.05, 0.2, 1, 'call') AS vega\"}, {\"description\": \"Convert to the desk 'per 1% vol' convention by dividing by 100.\", \"sql\": \"SELECT quant.main.bs_vega(100, 100, 0.05, 0.2, 1, 'call') / 100 AS vega_per_pct\"}]",
+        "vgi.keywords": "[\"black-scholes\", \"vega\", \"greeks\", \"volatility sensitivity\", \"vol\", \"option sensitivity\", \"bs_vega\"]",
+        "vgi.title": "Black-Scholes Option Vega"
+      },
+      "DOUBLE",
+      [
+        "spot",
+        "strike",
+        "rate",
+        "vol",
+        "ttm",
+        "opt_type"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22609,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "options"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "calendar_spread_rate",
+      null,
+      "scalar",
+      "Annual rate implied between two futures expiries: ln(far/near)/(far_ttm-near_ttm)",
+      null,
+      {
+        "vgi.category": "carry",
+        "vgi.doc_llm": "## calendar_spread_rate\n\nThe forward financing rate implied by two futures on the same underlying: `ln(far_price / near_price) / (far_ttm - near_ttm)`.\n\n**Signature:** `calendar_spread_rate(near_price, far_price, near_ttm, far_ttm)`; prices > 0, `near_ttm >= 0`, `far_ttm > near_ttm`, both in years from today.\n\n**Use:** read a futures curve as a strip of forward rates, e.g. the Dec->Feb and Feb->Apr legs of the gold curve, without needing a spot price.\n\n**Output:** a `DOUBLE` continuously compounded annual rate (0.05 = 5%/yr). NULL in -> NULL out.",
+        "vgi.doc_md": "# Calendar Spread Rate\n\nForward rate between two futures expiries.\n\n```sql\nSELECT quant.calendar_spread_rate(4050, 4110, 0.25, 0.5);  -- ~0.0588\n```\n\n- `far_ttm` must be later than `near_ttm`.\n- Use `LEAD()` over a curve ordered by expiry to get every leg.",
+        "vgi.example_queries": "[{\"description\": \"Gold 3-month future at 4050 and 6-month at 4110 imply ~5.88%/yr between them.\", \"sql\": \"SELECT ROUND(quant.main.calendar_spread_rate(4050, 4110, 0.25, 0.5), 4) AS fwd_rate\"}, {\"description\": \"Every leg of a futures curve, using LEAD over expiries.\", \"sql\": \"SELECT ttm, ROUND(quant.main.calendar_spread_rate(px, nx_px, ttm, nx_ttm), 4) AS leg_rate FROM (SELECT ttm, px, LEAD(px) OVER (ORDER BY ttm) AS nx_px, LEAD(ttm) OVER (ORDER BY ttm) AS nx_ttm FROM (VALUES (0.1, 4020.0), (0.25, 4050.0), (0.5, 4110.0)) c(ttm, px)) WHERE nx_px IS NOT NULL ORDER BY ttm\"}]",
+        "vgi.keywords": "[\"calendar spread\", \"futures curve\", \"term structure\", \"roll yield\", \"forward rate\"]",
+        "vgi.title": "Calendar Spread Rate"
+      },
+      "DOUBLE",
+      [
+        "near_price",
+        "far_price",
+        "near_ttm",
+        "far_ttm"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22610,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "carry"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "continuous_to_simple",
+      null,
+      "scalar",
+      "Convert a continuous annual rate to a simple rate over ttm years: (exp(rate*ttm)-1)/ttm",
+      null,
+      {
+        "vgi.category": "carry",
+        "vgi.doc_llm": "## continuous_to_simple\n\nConverts a continuously compounded annual rate (what the carry functions return) into a simple annual rate over a holding period: `(exp(rate * ttm) - 1) / ttm`.\n\n**Signature:** `continuous_to_simple(rate, ttm)`; `ttm` in years (> 0).\n\n**Use:** turn a carry rate into the simple return of a trade held for `ttm`, e.g. dollars earned = notional * result * ttm.\n\n**Output:** a `DOUBLE` simple annual rate. NULL in -> NULL out.",
+        "vgi.doc_md": "# Continuous to Simple Rate\n\n```sql\nSELECT quant.continuous_to_simple(0.05, 0.5);  -- ~0.0506\n```\n\n- Inverse of `simple_to_continuous` for the same `ttm`.",
+        "vgi.example_queries": "[{\"description\": \"5% continuous over six months is ~5.06% simple.\", \"sql\": \"SELECT ROUND(quant.main.continuous_to_simple(0.05, 0.5), 4) AS simple\"}, {\"description\": \"Dollar carry on $100,000 held 3 months at the gold futures carry rate.\", \"sql\": \"SELECT ROUND(100000 * quant.main.continuous_to_simple(quant.main.implied_carry_rate(4000, 4050, 0.25), 0.25) * 0.25, 2) AS dollars\"}]",
+        "vgi.keywords": "[\"compounding\", \"rate conversion\", \"simple interest\", \"holding period return\"]",
+        "vgi.title": "Continuous to Simple Rate"
+      },
+      "DOUBLE",
+      [
+        "rate",
+        "ttm"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22611,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "carry"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "day_count_conventions",
+      null,
+      "table",
+      "Every day-count convention string year_fraction() supports",
+      null,
+      {
+        "vgi.category": "conventions",
+        "vgi.doc_llm": "## day_count_conventions\n\nA discovery **table function** listing every day-count convention string accepted by `year_fraction`, one per row.\n\n**Signature:** `day_count_conventions()` -- takes no arguments and returns a single `name` column.\n\nUse it to discover the valid `convention` literals before calling `quant.year_fraction(start, end, convention)`. Each returned `name` (e.g. `ACT/360`, `30/360`) is a value you can pass directly as that trailing argument.",
+        "vgi.doc_md": "# Day-Count Conventions Catalog\n\nLists the day-count convention strings `year_fraction` accepts, one per row.\n\n## Usage\n\nScan the object (it takes no arguments) to enumerate the accepted `convention` literals, then pass any returned `name` as the trailing `convention` argument to `year_fraction`. The object's example queries give ready-to-run listings.\n\n## Notes\n\n- Set-returning table function (takes no arguments).\n- Each `name` is valid as the `convention` argument to `year_fraction`.",
+        "vgi.example_queries": "[{\"description\": \"List every supported day-count convention name, alphabetically.\", \"sql\": \"SELECT name FROM quant.main.day_count_conventions() ORDER BY name\"}, {\"description\": \"Count how many day-count conventions the worker supports.\", \"sql\": \"SELECT count(*) AS n FROM quant.main.day_count_conventions()\"}]",
+        "vgi.keywords": "[\"day count\", \"conventions\", \"discovery\", \"list conventions\", \"act/360\", \"30/360\", \"year fraction\", \"day_count_conventions\"]",
+        "vgi.result_columns_schema": "[{\"name\": \"name\", \"type\": \"VARCHAR\", \"description\": \"A day-count convention string accepted as the trailing `convention` argument to year_fraction(start, end, convention).\"}]",
+        "vgi.title": "Day-Count Conventions Catalog"
+      },
+      null,
+      [],
+      [],
+      null,
+      null,
+      null,
+      true,
+      null,
+      22620,
+      [],
+      null,
+      [
+        "quant",
+        "conventions"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "discount_factor",
+      null,
+      "scalar",
+      "Continuously-compounded discount factor exp(-rate * ttm)",
+      null,
+      {
+        "vgi.category": "conventions",
+        "vgi.doc_llm": "## discount_factor\n\nCompute the continuously-compounded **discount factor** `exp(-rate * ttm)` -- the present value today of one unit of currency received at a future time.\n\n**Signature:** `discount_factor(rate, ttm)` -- `rate` is the continuously-compounded annual rate; `ttm` is the time horizon in years.\n\n**Output:** a `DOUBLE` in `(0, 1]` for non-negative rates. Multiply a future cash flow by it to discount (or use `present_value`). NULL in -> NULL out.",
+        "vgi.doc_md": "# Continuous Discount Factor\n\nContinuously-compounded discount factor `exp(-rate * ttm)`.\n\n## Usage\n\n```sql\nSELECT quant.discount_factor(0.05, 1);  -- exp(-0.05) ~ 0.9512\n```\n\n## Notes\n\n- Continuous compounding (not periodic).\n- Multiply a future amount by this to get its present value.",
+        "vgi.example_queries": "[{\"description\": \"One-year continuously-compounded discount factor at 5% is exp(-0.05) (~0.9512).\", \"sql\": \"SELECT quant.main.discount_factor(0.05, 1) AS df\"}, {\"description\": \"Two-year discount factor at 5% is exp(-0.10) (~0.9048).\", \"sql\": \"SELECT quant.main.discount_factor(0.05, 2) AS df\"}]",
+        "vgi.keywords": "[\"discount factor\", \"present value\", \"continuous compounding\", \"exp\", \"discounting\", \"discount_factor\"]",
+        "vgi.title": "Continuous Discount Factor"
+      },
+      "DOUBLE",
+      [
+        "rate",
+        "ttm"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22612,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "conventions"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "funding_rate_annual",
+      null,
+      "scalar",
+      "Continuous annual rate equivalent to a perpetual-futures funding rate",
+      null,
+      {
+        "vgi.category": "carry",
+        "vgi.doc_llm": "## funding_rate_annual\n\nAnnualizes a perpetual-futures funding rate onto the same continuous basis as the other carry functions: `ln(1 + rate) * 8760 / interval_hours`.\n\n**Signature:** `funding_rate_annual(rate, interval_hours)`; `rate` is the per-interval rate as a decimal (0.0001 = 1 bp), `interval_hours` how often it is paid (8 on most venues, 1 on Hyperliquid).\n\n**Sign:** positive means longs pay shorts, so it is what a short earns. A short perp plus a long future earns `funding_rate_annual(...) - implied_carry_rate(...)`.\n\n**Output:** a `DOUBLE` continuously compounded annual rate (0.05 = 5%/yr). NULL in -> NULL out.",
+        "vgi.doc_md": "# Annualized Funding Rate\n\nPerp funding to a continuous annual rate.\n\n```sql\nSELECT quant.funding_rate_annual(0.0001, 8);  -- the 1 bp/8h floor, ~0.1095\n```\n\n- Treats each payment as compounding; the simple `rate * 1095` differs only slightly at normal rates.",
+        "vgi.example_queries": "[{\"description\": \"The common 1 bp per 8 hours funding floor is ~10.95%/yr.\", \"sql\": \"SELECT ROUND(quant.main.funding_rate_annual(0.0001, 8), 4) AS annual\"}, {\"description\": \"A short perp hedged with a long future: funding minus futures carry.\", \"sql\": \"SELECT ROUND(quant.main.funding_rate_annual(0.0001, 8) - quant.main.implied_carry_rate(4000, 4050, 0.25), 4) AS net_carry\"}]",
+        "vgi.keywords": "[\"funding rate\", \"perpetual futures\", \"perps\", \"annualize\", \"basis trade\"]",
+        "vgi.title": "Annualized Funding Rate"
+      },
+      "DOUBLE",
+      [
+        "rate",
+        "interval_hours"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22613,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "carry"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "implied_carry_rate",
+      null,
+      "scalar",
+      "Annual cost of carry implied by a spot and a futures price: ln(forward/spot)/ttm",
+      null,
+      {
+        "vgi.category": "carry",
+        "vgi.doc_llm": "## implied_carry_rate\n\nThe annual rate implied by the gap between a spot price and a forward or futures price on the same underlying: `ln(forward / spot) / ttm`.\n\n**Signature:** `implied_carry_rate(spot, forward, ttm)`; prices > 0, `ttm` in years.\n\n**Meaning:** the net cost of carry, i.e. financing minus any income the underlying pays (dividends, lease rate, convenience yield). For gold, income is roughly zero, so this is the financing rate a cash-and-carry trade earns: buy spot, sell the future. Compare it with `tbill_rate` or `box_spread_rate`.\n\n**Output:** a `DOUBLE` continuously compounded annual rate (0.05 = 5%/yr). NULL in -> NULL out.",
+        "vgi.doc_md": "# Implied Carry Rate\n\nAnnualized basis between spot and a future, `ln(forward / spot) / ttm`.\n\n```sql\nSELECT quant.implied_carry_rate(4000, 4050, 0.25);  -- ~0.0497\n```\n\n- Continuously compounded; convert with `continuous_to_simple`.\n- Negative when the future trades below spot (backwardation).",
+        "vgi.example_queries": "[{\"description\": \"Gold at 4000 spot with the 3-month future at 4050 implies ~4.97%/yr of carry.\", \"sql\": \"SELECT ROUND(quant.main.implied_carry_rate(4000, 4050, 0.25), 4) AS carry\"}, {\"description\": \"Carry over a 3-month T-bill: what a cash-and-carry earns above cash.\", \"sql\": \"SELECT ROUND(quant.main.implied_carry_rate(4000, 4050, 0.25) - quant.main.tbill_rate(0.0412, 91), 4) AS excess\"}]",
+        "vgi.keywords": "[\"cost of carry\", \"basis\", \"cash and carry\", \"futures\", \"forward\", \"implied repo\"]",
+        "vgi.title": "Implied Carry Rate"
+      },
+      "DOUBLE",
+      [
+        "spot",
+        "forward",
+        "ttm"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22614,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "carry"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "implied_vol",
+      null,
+      "scalar",
+      "Black-Scholes implied volatility reproducing an option price (raises if not invertible)",
+      null,
+      {
+        "vgi.category": "options",
+        "vgi.doc_llm": "## implied_vol\n\nInvert the Black-Scholes model: given an observed option **price**, solve for the volatility that reproduces it.\n\n**Signature:** `implied_vol(price, spot, strike, rate, ttm, opt_type)` -- note `price` comes **first** and there is no `vol` argument (that is what is solved for). `opt_type` is the literal `'call'`/`'put'`.\n\n**Output:** annualized volatility as a `DOUBLE` (e.g. `0.20` for 20%). Use it to back out market-implied vol from quoted prices. NULL in -> NULL out; a non-invertible price (e.g. below intrinsic value) raises a clear error.",
+        "vgi.doc_md": "# Black-Scholes Implied Volatility\n\nSolves for the volatility consistent with an observed option price.\n\n## Usage\n\n```sql\nSELECT quant.implied_vol(10.45, 100, 100, 0.05, 1, 'call');  -- ~0.20\n```\n\n## Notes\n\n- Argument order is `(price, spot, strike, rate, ttm, opt_type)`.\n- Round-trips `bs_price`: feeding its output recovers the vol.\n- Raises if the price is not invertible (e.g. below intrinsic).",
+        "vgi.example_queries": "[{\"description\": \"Recover the ~0.20 implied volatility from a Black-Scholes call price.\", \"sql\": \"SELECT quant.main.implied_vol(10.45, 100, 100, 0.05, 1, 'call') AS iv\"}, {\"description\": \"Round-trip: price a call, then invert that price back to its vol.\", \"sql\": \"SELECT quant.main.implied_vol(quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'call'), 100, 100, 0.05, 1, 'call') AS iv\"}]",
+        "vgi.keywords": "[\"black-scholes\", \"implied volatility\", \"iv\", \"invert\", \"option price\", \"vol surface\", \"implied_vol\"]",
+        "vgi.title": "Black-Scholes Implied Volatility"
+      },
+      "DOUBLE",
+      [
+        "price",
+        "spot",
+        "strike",
+        "rate",
+        "ttm",
+        "opt_type"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE",
+        "VARCHAR"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22615,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "options"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "present_value",
+      null,
+      "scalar",
+      "Present value amount * exp(-rate * ttm) (continuous compounding)",
+      null,
+      {
+        "vgi.category": "conventions",
+        "vgi.doc_llm": "## present_value\n\nCompute the **present value** of a future cash amount under continuous compounding: `amount * exp(-rate * ttm)`.\n\n**Signature:** `present_value(amount, rate, ttm)` -- `amount` is the future cash flow; `rate` is the continuously-compounded annual discount rate; `ttm` is the time horizon in years.\n\n**Output:** the discounted value today as a `DOUBLE`. Equivalent to `amount * discount_factor(rate, ttm)`. NULL in -> NULL out.",
+        "vgi.doc_md": "# Continuous Present Value\n\nPresent value of a future amount, `amount * exp(-rate * ttm)`.\n\n## Usage\n\n```sql\nSELECT quant.present_value(100, 0.05, 1);  -- ~95.12\n```\n\n## Notes\n\n- Continuous compounding.\n- Equals `amount * discount_factor(rate, ttm)`.",
+        "vgi.example_queries": "[{\"description\": \"Present value of 100 due in one year, discounted continuously at 5% (~95.12).\", \"sql\": \"SELECT quant.main.present_value(100, 0.05, 1) AS pv\"}, {\"description\": \"Present value of 1000 due in two years at 5% is 1000 * exp(-0.10) (~904.84).\", \"sql\": \"SELECT quant.main.present_value(1000, 0.05, 2) AS pv\"}]",
+        "vgi.keywords": "[\"present value\", \"discounting\", \"npv\", \"continuous compounding\", \"time value of money\", \"present_value\"]",
+        "vgi.title": "Continuous Present Value"
+      },
+      "DOUBLE",
+      [
+        "amount",
+        "rate",
+        "ttm"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE",
+        "DOUBLE"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22616,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "conventions"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "simple_to_continuous",
+      null,
+      "scalar",
+      "Convert a simple annual rate over ttm years to continuous: ln(1+rate*ttm)/ttm",
+      null,
+      {
+        "vgi.category": "carry",
+        "vgi.doc_llm": "## simple_to_continuous\n\nConverts a simple (money-market) annual rate, where interest is `rate * ttm`, into the continuously compounded rate the carry functions return: `ln(1 + rate * ttm) / ttm`.\n\n**Signature:** `simple_to_continuous(rate, ttm)`; `ttm` in years (> 0).\n\n**Use:** bring a quoted simple rate (SOFR term rate, a broker's margin rate, a simple-annualized funding rate) onto the continuous basis.\n\n**Output:** a `DOUBLE` continuously compounded annual rate (0.05 = 5%/yr). NULL in -> NULL out.",
+        "vgi.doc_md": "# Simple to Continuous Rate\n\n```sql\nSELECT quant.simple_to_continuous(0.05, 0.5);  -- ~0.0494\n```\n\n- Inverse of `continuous_to_simple` for the same `ttm`.",
+        "vgi.example_queries": "[{\"description\": \"5% simple over six months is ~4.94% continuous.\", \"sql\": \"SELECT ROUND(quant.main.simple_to_continuous(0.05, 0.5), 4) AS cont\"}, {\"description\": \"Round trip through continuous_to_simple returns the input.\", \"sql\": \"SELECT ROUND(quant.main.continuous_to_simple(quant.main.simple_to_continuous(0.05, 0.5), 0.5), 6) AS back\"}]",
+        "vgi.keywords": "[\"compounding\", \"rate conversion\", \"simple interest\", \"continuous compounding\"]",
+        "vgi.title": "Simple to Continuous Rate"
+      },
+      "DOUBLE",
+      [
+        "rate",
+        "ttm"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22617,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "carry"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "tbill_rate",
+      null,
+      "scalar",
+      "Continuous annual rate of a T-bill quoted on the bank-discount basis (ACT/360)",
+      null,
+      {
+        "vgi.category": "carry",
+        "vgi.doc_llm": "## tbill_rate\n\nConverts a Treasury bill's bank-discount quote into a continuously compounded annual rate, so it can be compared with the other carry functions.\n\n**Signature:** `tbill_rate(discount_rate, days)`; `discount_rate` as a decimal (0.0412 for 4.12%), `days` to maturity (> 0). Price per 1 of face is `1 - discount_rate * days / 360`; the result is `-ln(price) / (days / 365)`.\n\n**Use:** the risk-free benchmark. Yahoo's `^IRX` and Treasury's daily bill rates are discount quotes for the 13-week (91-day) bill.\n\n**Output:** a `DOUBLE` continuously compounded annual rate (0.05 = 5%/yr). NULL in -> NULL out.",
+        "vgi.doc_md": "# Treasury Bill Rate\n\nBank-discount T-bill quote to a continuous annual rate.\n\n```sql\nSELECT quant.tbill_rate(0.0412, 91);  -- ~0.0420\n```\n\n- Discount yields understate the true rate; this corrects for that and for ACT/360.",
+        "vgi.example_queries": "[{\"description\": \"A 91-day bill quoted at a 4.12% discount is ~4.20%/yr continuous.\", \"sql\": \"SELECT ROUND(quant.main.tbill_rate(0.0412, 91), 4) AS bill_rate\"}, {\"description\": \"Bill-equivalent rates for a few quotes and tenors.\", \"sql\": \"SELECT days, ROUND(quant.main.tbill_rate(d, days), 4) AS rate FROM (VALUES (0.0412, 28), (0.0412, 91), (0.0400, 182)) q(d, days) ORDER BY days\"}]",
+        "vgi.keywords": "[\"treasury bill\", \"t-bill\", \"discount yield\", \"risk-free rate\", \"irx\", \"money market\"]",
+        "vgi.title": "Treasury Bill Rate"
+      },
+      "DOUBLE",
+      [
+        "discount_rate",
+        "days"
+      ],
+      [
+        "DOUBLE",
+        "DOUBLE"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22618,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "carry"
+      ]
+    ],
+    [
+      "quant",
+      "22595",
+      "main",
+      "year_fraction",
+      null,
+      "scalar",
+      "Year fraction between two dates under a day-count convention ('ACT/360', 'ACT/365', '30/360', 'ACT/ACT'). Unknown convention raises.",
+      null,
+      {
+        "vgi.category": "conventions",
+        "vgi.doc_llm": "## year_fraction\n\nCompute the **year fraction** between two dates under a day-count convention -- the accrual basis used to prorate interest and discount factors.\n\n**Signature:** `year_fraction(start, end, convention)` -- `start` and `end` are `DATE` columns; `convention` is the **literal** convention string: `'ACT/360'`, `'ACT/365'`, `'30/360'`, or `'ACT/ACT'` (case-insensitive). Discover the accepted strings with `quant.day_count_conventions()`.\n\n**Output:** the elapsed time as a fraction of a year (`DOUBLE`). NULL dates -> NULL; an unknown convention raises.",
+        "vgi.doc_md": "# Day-Count Year Fraction\n\nYear fraction between two dates under a day-count convention.\n\n## Usage\n\n```sql\nSELECT quant.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360');  -- 181/360 ~ 0.5028\n```\n\n## Notes\n\n- Conventions: `ACT/360`, `ACT/365`, `30/360`, `ACT/ACT`.\n- Convention matching is case-insensitive.\n- See `day_count_conventions()` for the full list.",
+        "vgi.example_queries": "[{\"description\": \"Year fraction of a Jan-1 to Jul-1 span under ACT/360 is 181/360 (~0.5028).\", \"sql\": \"SELECT quant.main.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360') AS yf\"}, {\"description\": \"The same span under 30/360 is exactly 0.5 (six 30-day months).\", \"sql\": \"SELECT quant.main.year_fraction(DATE '2026-01-01', DATE '2026-07-01', '30/360') AS yf\"}]",
+        "vgi.executable_examples": "[{\"description\": \"Black-Scholes price of an at-the-money 1y European call.\", \"sql\": \"SELECT quant.main.bs_price(100, 100, 0.05, 0.2, 1, 'call') AS price\"},{\"description\": \"Recover implied volatility from a Black-Scholes call price.\", \"sql\": \"SELECT quant.main.implied_vol(10.45, 100, 100, 0.05, 1, 'call') AS iv\"},{\"description\": \"Clean price of a 10y semiannual par bond.\", \"sql\": \"SELECT quant.main.bond_price(100, 0.05, 0.05, 10, 2) AS clean_price\"},{\"description\": \"Year fraction of a half-year span under ACT/360.\", \"sql\": \"SELECT quant.main.year_fraction(DATE '2026-01-01', DATE '2026-07-01', 'ACT/360') AS yf\"},{\"description\": \"List the supported day-count conventions.\", \"sql\": \"SELECT name FROM quant.main.day_count_conventions() ORDER BY name\"}]",
+        "vgi.keywords": "[\"day count\", \"year fraction\", \"accrual\", \"act/360\", \"act/365\", \"30/360\", \"act/act\", \"convention\", \"year_fraction\"]",
+        "vgi.title": "Day-Count Year Fraction"
+      },
+      "DOUBLE",
+      [
+        "start",
+        "end",
+        "convention"
+      ],
+      [
+        "DATE",
+        "DATE",
+        "VARCHAR"
+      ],
+      null,
+      null,
+      false,
+      true,
+      null,
+      22619,
+      [],
+      "CONSISTENT",
+      [
+        "quant",
+        "conventions"
+      ]
+    ]
+  ]
+}

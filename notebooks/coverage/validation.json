@@ -1,0 +1,1342 @@
+{
+  "schema_version": 1,
+  "status": "met",
+  "meets_target": true,
+  "catalogs": {
+    "released": {
+      "catalog_status": "verified",
+      "revision": "v0.5.0",
+      "catalog_sha256": "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb",
+      "collection_reconciled": true,
+      "denominator": 22,
+      "observed_objects": 22,
+      "required": 11,
+      "verified_count": 12,
+      "candidate_count": 0,
+      "fraction": 0.5454545454545454,
+      "meets_target": true,
+      "exact_runtime_count": 12,
+      "runtime_revisions": [
+        "v0.5.0"
+      ],
+      "covered": [
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bond_convexity"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bond_duration"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bond_price"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bond_yield"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_delta"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_gamma"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_price"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "day_count_conventions"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "discount_factor"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "implied_vol"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "present_value"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "year_fraction"
+        }
+      ],
+      "uncovered": [
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "box_spread_rate"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_rho"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_theta"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_vega"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "calendar_spread_rate"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "continuous_to_simple"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "funding_rate_annual"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "implied_carry_rate"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "simple_to_continuous"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "tbill_rate"
+        }
+      ],
+      "objects": [
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bond_convexity",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bond_convexity(face DOUBLE, coupon_rate DOUBLE, yield_rate DOUBLE, years DOUBLE, freq BIGINT) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bond_duration",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bond_duration(face DOUBLE, coupon_rate DOUBLE, yield_rate DOUBLE, years DOUBLE, freq BIGINT) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bond_price",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bond_price(face DOUBLE, coupon_rate DOUBLE, yield_rate DOUBLE, years DOUBLE, freq BIGINT) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bond_yield",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bond_yield(price DOUBLE, face DOUBLE, coupon_rate DOUBLE, years DOUBLE, freq BIGINT) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "box_spread_rate",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "box_spread_rate(box_price DOUBLE, low_strike DOUBLE, high_strike DOUBLE, ttm DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_delta",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bs_delta(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_gamma",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bs_gamma(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_price",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bs_price(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_rho",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bs_rho(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_theta",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bs_theta(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_vega",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bs_vega(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "calendar_spread_rate",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "calendar_spread_rate(near_price DOUBLE, far_price DOUBLE, near_ttm DOUBLE, far_ttm DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "continuous_to_simple",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "continuous_to_simple(rate DOUBLE, ttm DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "day_count_conventions",
+          "kinds": [
+            "function",
+            "table"
+          ],
+          "signatures": [
+            "TABLE(name VARCHAR)",
+            "day_count_conventions() -> TABLE(name VARCHAR)"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "discount_factor",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "discount_factor(rate DOUBLE, ttm DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "funding_rate_annual",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "funding_rate_annual(rate DOUBLE, interval_hours DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "implied_carry_rate",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "implied_carry_rate(spot DOUBLE, forward DOUBLE, ttm DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "implied_vol",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "implied_vol(price DOUBLE, spot DOUBLE, strike DOUBLE, rate DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "present_value",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "present_value(amount DOUBLE, rate DOUBLE, ttm DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "simple_to_continuous",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "simple_to_continuous(rate DOUBLE, ttm DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "tbill_rate",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "tbill_rate(discount_rate DOUBLE, days DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "year_fraction",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "year_fraction(start DATE, end DATE, convention VARCHAR) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        }
+      ],
+      "issues": []
+    },
+    "current": {
+      "catalog_status": "verified",
+      "revision": "43beb22ff9675305cfa9809a3ad2e130b46d5109",
+      "catalog_sha256": "62787ee63050aaabf3c6b300df585eb958cdada3cf77de24d3791f25bc6d9d81",
+      "collection_reconciled": true,
+      "denominator": 22,
+      "observed_objects": 22,
+      "required": 11,
+      "verified_count": 12,
+      "candidate_count": 0,
+      "fraction": 0.5454545454545454,
+      "meets_target": true,
+      "exact_runtime_count": 0,
+      "runtime_revisions": [
+        "v0.5.0"
+      ],
+      "covered": [
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bond_convexity"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bond_duration"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bond_price"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bond_yield"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_delta"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_gamma"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_price"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "day_count_conventions"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "discount_factor"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "implied_vol"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "present_value"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "year_fraction"
+        }
+      ],
+      "uncovered": [
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "box_spread_rate"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_rho"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_theta"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_vega"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "calendar_spread_rate"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "continuous_to_simple"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "funding_rate_annual"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "implied_carry_rate"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "simple_to_continuous"
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "tbill_rate"
+        }
+      ],
+      "objects": [
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bond_convexity",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bond_convexity(face DOUBLE, coupon_rate DOUBLE, yield_rate DOUBLE, years DOUBLE, freq BIGINT) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bond_duration",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bond_duration(face DOUBLE, coupon_rate DOUBLE, yield_rate DOUBLE, years DOUBLE, freq BIGINT) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bond_price",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bond_price(face DOUBLE, coupon_rate DOUBLE, yield_rate DOUBLE, years DOUBLE, freq BIGINT) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bond_yield",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bond_yield(price DOUBLE, face DOUBLE, coupon_rate DOUBLE, years DOUBLE, freq BIGINT) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "box_spread_rate",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "box_spread_rate(box_price DOUBLE, low_strike DOUBLE, high_strike DOUBLE, ttm DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_delta",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bs_delta(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_gamma",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bs_gamma(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_price",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bs_price(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_rho",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bs_rho(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_theta",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bs_theta(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "bs_vega",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "bs_vega(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "calendar_spread_rate",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "calendar_spread_rate(near_price DOUBLE, far_price DOUBLE, near_ttm DOUBLE, far_ttm DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "continuous_to_simple",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "continuous_to_simple(rate DOUBLE, ttm DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "day_count_conventions",
+          "kinds": [
+            "function",
+            "table"
+          ],
+          "signatures": [
+            "TABLE(name VARCHAR)",
+            "day_count_conventions() -> TABLE(name VARCHAR)"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "discount_factor",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "discount_factor(rate DOUBLE, ttm DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "funding_rate_annual",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "funding_rate_annual(rate DOUBLE, interval_hours DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "implied_carry_rate",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "implied_carry_rate(spot DOUBLE, forward DOUBLE, ttm DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "implied_vol",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "implied_vol(price DOUBLE, spot DOUBLE, strike DOUBLE, rate DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "present_value",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "present_value(amount DOUBLE, rate DOUBLE, ttm DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "simple_to_continuous",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "simple_to_continuous(rate DOUBLE, ttm DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "tbill_rate",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "tbill_rate(discount_rate DOUBLE, days DOUBLE) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        },
+        {
+          "schema": [
+            "main"
+          ],
+          "name": "year_fraction",
+          "kinds": [
+            "function"
+          ],
+          "signatures": [
+            "year_fraction(start DATE, end DATE, convention VARCHAR) -> DOUBLE"
+          ],
+          "access": [
+            "read"
+          ],
+          "authentication": [
+            "none"
+          ]
+        }
+      ],
+      "issues": []
+    }
+  },
+  "interface_drift": {
+    "known": true,
+    "current_only": [],
+    "released_only": [],
+    "changed": []
+  },
+  "notebooks": {
+    "01_local_greeks_and_full_repricing.ipynb": {
+      "verified": true,
+      "issues": []
+    },
+    "02_clean_quotes_and_yield_shocks.ipynb": {
+      "verified": true,
+      "issues": []
+    },
+    "03_dates_conventions_and_present_value.ipynb": {
+      "verified": true,
+      "issues": []
+    }
+  },
+  "examples": [
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "bs_price"
+      },
+      "notebook": "01_local_greeks_and_full_repricing.ipynb",
+      "runtime_revision": "v0.5.0",
+      "runtime_catalog_sha256": "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "bs_delta"
+      },
+      "notebook": "01_local_greeks_and_full_repricing.ipynb",
+      "runtime_revision": "v0.5.0",
+      "runtime_catalog_sha256": "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "bs_gamma"
+      },
+      "notebook": "01_local_greeks_and_full_repricing.ipynb",
+      "runtime_revision": "v0.5.0",
+      "runtime_catalog_sha256": "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "implied_vol"
+      },
+      "notebook": "01_local_greeks_and_full_repricing.ipynb",
+      "runtime_revision": "v0.5.0",
+      "runtime_catalog_sha256": "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "bond_price"
+      },
+      "notebook": "02_clean_quotes_and_yield_shocks.ipynb",
+      "runtime_revision": "v0.5.0",
+      "runtime_catalog_sha256": "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "bond_duration"
+      },
+      "notebook": "02_clean_quotes_and_yield_shocks.ipynb",
+      "runtime_revision": "v0.5.0",
+      "runtime_catalog_sha256": "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "bond_convexity"
+      },
+      "notebook": "02_clean_quotes_and_yield_shocks.ipynb",
+      "runtime_revision": "v0.5.0",
+      "runtime_catalog_sha256": "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "bond_yield"
+      },
+      "notebook": "02_clean_quotes_and_yield_shocks.ipynb",
+      "runtime_revision": "v0.5.0",
+      "runtime_catalog_sha256": "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "day_count_conventions"
+      },
+      "notebook": "03_dates_conventions_and_present_value.ipynb",
+      "runtime_revision": "v0.5.0",
+      "runtime_catalog_sha256": "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "year_fraction"
+      },
+      "notebook": "03_dates_conventions_and_present_value.ipynb",
+      "runtime_revision": "v0.5.0",
+      "runtime_catalog_sha256": "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "discount_factor"
+      },
+      "notebook": "03_dates_conventions_and_present_value.ipynb",
+      "runtime_revision": "v0.5.0",
+      "runtime_catalog_sha256": "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb"
+    },
+    {
+      "status": "verified",
+      "issues": [],
+      "verified_catalogs": [
+        "released",
+        "current"
+      ],
+      "object": {
+        "schema": [
+          "main"
+        ],
+        "name": "present_value"
+      },
+      "notebook": "03_dates_conventions_and_present_value.ipynb",
+      "runtime_revision": "v0.5.0",
+      "runtime_catalog_sha256": "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb"
+    }
+  ],
+  "issues": []
+}

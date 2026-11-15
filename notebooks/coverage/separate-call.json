@@ -1,0 +1,12 @@
+{
+  "query": "SELECT quant.main.bs_price(100,100,0.05,0.2,1,'call') AS c",
+  "captured_at": "2026-11-15T01:24:29.096593+00:00",
+  "columns": [
+    "c"
+  ],
+  "rows": [
+    [
+      10.450583572185577
+    ]
+  ]
+}

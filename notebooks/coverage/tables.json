@@ -1,0 +1,52 @@
+{
+  "query": "SELECT * FROM duckdb_tables() WHERE database_name='quant'",
+  "captured_at": "2026-11-15T01:24:29.076549+00:00",
+  "columns": [
+    "database_name",
+    "database_oid",
+    "schema_name",
+    "schema_oid",
+    "table_name",
+    "table_oid",
+    "comment",
+    "tags",
+    "internal",
+    "temporary",
+    "has_primary_key",
+    "estimated_size",
+    "column_count",
+    "index_count",
+    "check_constraint_count",
+    "sql"
+  ],
+  "rows": [
+    [
+      "quant",
+      22595,
+      "main",
+      22596,
+      "day_count_conventions",
+      22751,
+      "The day-count convention strings year_fraction() accepts, one per row",
+      {
+        "category": "quantitative-finance",
+        "domain": "finance",
+        "topic": "day-count-conventions",
+        "vgi.category": "conventions",
+        "vgi.doc_llm": "## day_count_conventions (table)\n\nA reference **table** of every day-count convention string accepted by `year_fraction`, one per row, with a single `name` column.\n\nScan it (no parentheses) to discover the valid `convention` literals before calling `year_fraction`. Each `name` (e.g. `ACT/360`, `30/360`) is a value you can pass directly as the trailing `convention` argument. The identical rows are also reachable via the `day_count_conventions` table function. The table's example queries give ready-to-run listings.",
+        "vgi.doc_md": "# Day-Count Conventions Reference Table\n\nLists the day-count convention strings `year_fraction` accepts, one per row.\n\n## Usage\n\nScan the table (no parentheses) to enumerate the accepted `convention` literals, then pass any returned `name` as the trailing `convention` argument to `year_fraction`. The table's example queries give ready-to-run listings.\n\n## Notes\n\n- One row per supported convention; `name` is the primary key.\n- Each `name` is valid as the `convention` argument to `year_fraction`.",
+        "vgi.example_queries": "[{\"description\": \"List the supported day-count convention names, alphabetically.\", \"sql\": \"SELECT name FROM quant.main.day_count_conventions ORDER BY name\"}, {\"description\": \"Count how many day-count conventions are supported.\", \"sql\": \"SELECT count(*) AS n FROM quant.main.day_count_conventions\"}, {\"description\": \"Show only the actual/actual-family conventions.\", \"sql\": \"SELECT name FROM quant.main.day_count_conventions WHERE name LIKE 'ACT%' ORDER BY name\"}]",
+        "vgi.keywords": "[\"day count\", \"conventions\", \"discovery\", \"list conventions\", \"act/360\", \"30/360\", \"year fraction\", \"day_count_conventions\"]",
+        "vgi.title": "Day-count convention list"
+      },
+      false,
+      false,
+      true,
+      0,
+      1,
+      1,
+      0,
+      "CREATE TABLE day_count_conventions(\"name\" VARCHAR, PRIMARY KEY(\"name\"));"
+    ]
+  ]
+}

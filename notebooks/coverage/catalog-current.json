@@ -1,0 +1,322 @@
+{
+  "schema_version": 1,
+  "repository": "Query-farm/vgi-quant",
+  "revision": "43beb22ff9675305cfa9809a3ad2e130b46d5109",
+  "captured_at": "2026-11-15T01:24:29.069667+00:00",
+  "default_schema": "main",
+  "scope": "all_public_functions_and_tables",
+  "complete": true,
+  "evidence": [
+    {
+      "path": "coverage/arguments.json",
+      "sha256": "1e7707f067aa535fddbf1b56d95de7836fa3872b87cfa7fb0f0209b70dbf9bdc",
+      "description": "Actual full runtime exports, native arguments, table schema, reviewed source diff and runtime probes."
+    },
+    {
+      "path": "coverage/bond-face-probe.json",
+      "sha256": "d15931a70e629f84bcdc10d81322f85b3aa8ba001f43750b5648ba926d8e0e59",
+      "description": "Actual full runtime exports, native arguments, table schema, reviewed source diff and runtime probes."
+    },
+    {
+      "path": "coverage/catalog-metadata.json",
+      "sha256": "148af33500f924fe73a02a580a501b7b252b904c6018c6405eed770e280c0f69",
+      "description": "Actual full runtime exports, native arguments, table schema, reviewed source diff and runtime probes."
+    },
+    {
+      "path": "coverage/copy-formats.json",
+      "sha256": "2822d257fa0da0d144d1b313148d0c1ad5dc037590b851e7c3f32a9b34377408",
+      "description": "Actual full runtime exports, native arguments, table schema, reviewed source diff and runtime probes."
+    },
+    {
+      "path": "coverage/day_count_conventions-columns.json",
+      "sha256": "2d372badebbf2c1f1d9b634ccb5f6acc6d6fdba3653afaf5f38519ee6beea010",
+      "description": "Actual full runtime exports, native arguments, table schema, reviewed source diff and runtime probes."
+    },
+    {
+      "path": "coverage/day_count_conventions.json",
+      "sha256": "8498499a7c1bd59ee788dbe315151a8b7c12f072a60c0b4cc4a04b9240e211fa",
+      "description": "Actual full runtime exports, native arguments, table schema, reviewed source diff and runtime probes."
+    },
+    {
+      "path": "coverage/functions.json",
+      "sha256": "e8a86598b52aafa8219bc65a25c7077798dbc8c4a0c76cfc57f4280980975acb",
+      "description": "Actual full runtime exports, native arguments, table schema, reviewed source diff and runtime probes."
+    },
+    {
+      "path": "coverage/resolved-worker-packages.json",
+      "sha256": "a6b6cb380170bc7d26a8b9ecef678dfb7d1151e7204a89d9ca494f332ed32a6f",
+      "description": "Actual full runtime exports, native arguments, table schema, reviewed source diff and runtime probes."
+    },
+    {
+      "path": "coverage/same-select-call-put.json",
+      "sha256": "8cdd4aff00add274d2d7c5e8d36252ad94531f10b818d0a8ed9b94a0f8571434",
+      "description": "Actual full runtime exports, native arguments, table schema, reviewed source diff and runtime probes."
+    },
+    {
+      "path": "coverage/separate-call.json",
+      "sha256": "f5796cc0b095622ff9a6f24fbb16bb2f5f158124cf2031e41409c181a2bfb429",
+      "description": "Actual full runtime exports, native arguments, table schema, reviewed source diff and runtime probes."
+    },
+    {
+      "path": "coverage/separate-put.json",
+      "sha256": "e17f2fb4978d7f17a7cd6964766aae6abfa4997c5497e69274a9ab5dde45c5fd",
+      "description": "Actual full runtime exports, native arguments, table schema, reviewed source diff and runtime probes."
+    },
+    {
+      "path": "coverage/source-compatibility.json",
+      "sha256": "42130f46afe83cb32003448cddf9aa51f4957cd941d0b27b71c8a9f6c45240fa",
+      "description": "Actual full runtime exports, native arguments, table schema, reviewed source diff and runtime probes."
+    },
+    {
+      "path": "coverage/source-diff.patch",
+      "sha256": "552d9e5dfe383ecf7e4979ec0a9b95e19ee4febde09648ac85d51d63add1cc14",
+      "description": "Actual full runtime exports, native arguments, table schema, reviewed source diff and runtime probes."
+    },
+    {
+      "path": "coverage/tables.json",
+      "sha256": "6c0a59bbfbfd34228485c45c52096f756f91b736719987d42a4b4c9902534e6b",
+      "description": "Actual full runtime exports, native arguments, table schema, reviewed source diff and runtime probes."
+    },
+    {
+      "path": "coverage/views.json",
+      "sha256": "256c8ed70b78f69ce085c1b89360ad0afde68fa6c6ce7a1b69282a0e7fce8c8e",
+      "description": "Actual full runtime exports, native arguments, table schema, reviewed source diff and runtime probes."
+    }
+  ],
+  "objects": [
+    {
+      "schema": "main",
+      "name": "bond_convexity",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "bond_convexity(face DOUBLE, coupon_rate DOUBLE, yield_rate DOUBLE, years DOUBLE, freq BIGINT) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "bond_duration",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "bond_duration(face DOUBLE, coupon_rate DOUBLE, yield_rate DOUBLE, years DOUBLE, freq BIGINT) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "bond_price",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "bond_price(face DOUBLE, coupon_rate DOUBLE, yield_rate DOUBLE, years DOUBLE, freq BIGINT) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "bond_yield",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "bond_yield(price DOUBLE, face DOUBLE, coupon_rate DOUBLE, years DOUBLE, freq BIGINT) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "box_spread_rate",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "box_spread_rate(box_price DOUBLE, low_strike DOUBLE, high_strike DOUBLE, ttm DOUBLE) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "bs_delta",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "bs_delta(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "bs_gamma",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "bs_gamma(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "bs_price",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "bs_price(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "bs_rho",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "bs_rho(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "bs_theta",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "bs_theta(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "bs_vega",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "bs_vega(spot DOUBLE, strike DOUBLE, rate DOUBLE, vol DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "calendar_spread_rate",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "calendar_spread_rate(near_price DOUBLE, far_price DOUBLE, near_ttm DOUBLE, far_ttm DOUBLE) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "continuous_to_simple",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "continuous_to_simple(rate DOUBLE, ttm DOUBLE) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "day_count_conventions",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "day_count_conventions() -> TABLE(name VARCHAR)"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "discount_factor",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "discount_factor(rate DOUBLE, ttm DOUBLE) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "funding_rate_annual",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "funding_rate_annual(rate DOUBLE, interval_hours DOUBLE) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "implied_carry_rate",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "implied_carry_rate(spot DOUBLE, forward DOUBLE, ttm DOUBLE) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "implied_vol",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "implied_vol(price DOUBLE, spot DOUBLE, strike DOUBLE, rate DOUBLE, ttm DOUBLE, opt_type VARCHAR) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "present_value",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "present_value(amount DOUBLE, rate DOUBLE, ttm DOUBLE) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "simple_to_continuous",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "simple_to_continuous(rate DOUBLE, ttm DOUBLE) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "tbill_rate",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "tbill_rate(discount_rate DOUBLE, days DOUBLE) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "year_fraction",
+      "kind": "function",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "year_fraction(start DATE, end DATE, convention VARCHAR) -> DOUBLE"
+      ]
+    },
+    {
+      "schema": "main",
+      "name": "day_count_conventions",
+      "kind": "table",
+      "authentication": "none",
+      "access": "read",
+      "signatures": [
+        "TABLE(name VARCHAR)"
+      ],
+      "alias_of_same_named_function": true
+    }
+  ],
+  "launch": "uvx --python 3.13 --from git+https://github.com/Query-farm/vgi-quant@v0.5.0 vgi-quant-worker",
+  "runtime": "Haybarn2.0.0rc11",
+  "review_notes": "Twenty-two logical names from22function rows and one same-name day_count_conventions physical table alias. No views/COPY/authenticated/write objects. All22retained in denominator;12used in three focused stories. Uncovered: bs_vega,bs_theta,bs_rho and seven carry/rate-conversion functions. Current adds composed SQL examples and related agent/example metadata only. Complete package diff retained/reviewed; compute methods, registrations, schemas, entrypoint and root dependencies unchanged. Actual released interface supports current-compatible mapping, not an exact-current execution claim. The actual short release probe returns identical call prices for different call/put ConstParam values in the same vectorized SELECT. Separate materialized statements return correct call/put prices; notebook verifies parity and textbook values. bond_price returns clean quotes per100nominal independent of face size, contrary to released/current prose saying par price equals face. Face100/1000 probe retained; notebook labels actual units and cash-equivalent multiplication explicitly."
+}

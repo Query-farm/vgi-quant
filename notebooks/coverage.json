@@ -1,0 +1,542 @@
+{
+  "schema_version": 1,
+  "catalogs": {
+    "released": {
+      "path": "coverage/catalog-released.json",
+      "sha256": "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb",
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_earthquakes",
+        "reviewed_at": "2026-11-15T01:32:37.518372+00:00",
+        "catalog_sha256": "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb",
+        "notes": "Complete actual22function rows plus same-name day_count_conventions table alias =22logical names, including all factory-generated Black-Scholes names and seven carry functions. No views/COPY/auth/write. Current compute/registration/schema/dependencies unchanged, reviewed metadata/example-only delta. Runtime call/put constant-binding limitation and bond quote units retained explicitly. Ten uncovered names remain in denominator."
+      }
+    },
+    "current": {
+      "path": "coverage/catalog-current.json",
+      "sha256": "62787ee63050aaabf3c6b300df585eb958cdada3cf77de24d3791f25bc6d9d81",
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_earthquakes",
+        "reviewed_at": "2026-11-15T01:32:37.518372+00:00",
+        "catalog_sha256": "62787ee63050aaabf3c6b300df585eb958cdada3cf77de24d3791f25bc6d9d81",
+        "notes": "Complete actual22function rows plus same-name day_count_conventions table alias =22logical names, including all factory-generated Black-Scholes names and seven carry functions. No views/COPY/auth/write. Current compute/registration/schema/dependencies unchanged, reviewed metadata/example-only delta. Runtime call/put constant-binding limitation and bond quote units retained explicitly. Ten uncovered names remain in denominator."
+      }
+    }
+  },
+  "notebooks": [
+    {
+      "path": "01_local_greeks_and_full_repricing.ipynb",
+      "sha256": "833591ded3b486f479b42fa2b4b8b0ca91516dbdbff6e11b179d036f8968670e",
+      "execution": {
+        "path": "coverage/run-01.json",
+        "sha256": "cb180a5c4bfc2acd2ef3fa1393edd09427565e1ea0ca8396b0cf5b50fa467841"
+      }
+    },
+    {
+      "path": "02_clean_quotes_and_yield_shocks.ipynb",
+      "sha256": "67ad807a3e8e84cae4366f700d2915583b2ea61c9e39482b28b4ebc36d75cbf4",
+      "execution": {
+        "path": "coverage/run-02.json",
+        "sha256": "f0b9ec962b665f1d40ca253b6e9144485e46bce956aad510ac3a2cbc8dd4fbe7"
+      }
+    },
+    {
+      "path": "03_dates_conventions_and_present_value.ipynb",
+      "sha256": "ed54b77e6e3c5a422e3990512c7faf927aa4b7a9b437380948c5313c6bde2bfa",
+      "execution": {
+        "path": "coverage/run-03.json",
+        "sha256": "9d64faaee56f15a945adc7a709134b3e991b4e17f2c2f537366c65e7444927c1"
+      }
+    }
+  ],
+  "examples": [
+    {
+      "object": {
+        "schema": "main",
+        "name": "bs_price"
+      },
+      "notebook": "01_local_greeks_and_full_repricing.ipynb",
+      "sql": [
+        {
+          "cell": "2c119300",
+          "reference": "quant.main.bs_price"
+        }
+      ],
+      "narrative_cells": [
+        "6cb41c02",
+        "6eab316b",
+        "6257a180"
+      ],
+      "result_cells": [
+        "52514506",
+        "bf6b8732",
+        "88f4f20d",
+        "63031982",
+        "6b334da2"
+      ],
+      "interpretation_cells": [
+        "63031982",
+        "ce3f951f"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_earthquakes",
+        "reviewed_at": "2026-11-15T01:32:37.518372+00:00",
+        "notebook_sha256": "833591ded3b486f479b42fa2b4b8b0ca91516dbdbff6e11b179d036f8968670e",
+        "catalog_sha256": [
+          "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb",
+          "62787ee63050aaabf3c6b300df585eb958cdada3cf77de24d3791f25bc6d9d81"
+        ],
+        "purpose": "Compare actual spot repricing with fixed local first/second derivatives.",
+        "finding": "Authored European call baseline and full shock grid execute; SQL builds Taylor estimates and plots actual residuals. Separate call/put statements avoid measured runtime binding issue, parity and textbook checks verify outcomes. Central small-bump derivatives independently reconcile analytic delta/gamma; no hedge-profit claim."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "bs_delta"
+      },
+      "notebook": "01_local_greeks_and_full_repricing.ipynb",
+      "sql": [
+        {
+          "cell": "2c119300",
+          "reference": "quant.main.bs_delta"
+        }
+      ],
+      "narrative_cells": [
+        "6cb41c02",
+        "6eab316b",
+        "6257a180"
+      ],
+      "result_cells": [
+        "52514506",
+        "bf6b8732",
+        "88f4f20d",
+        "63031982",
+        "6b334da2"
+      ],
+      "interpretation_cells": [
+        "63031982",
+        "ce3f951f"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_earthquakes",
+        "reviewed_at": "2026-11-15T01:32:37.518372+00:00",
+        "notebook_sha256": "833591ded3b486f479b42fa2b4b8b0ca91516dbdbff6e11b179d036f8968670e",
+        "catalog_sha256": [
+          "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb",
+          "62787ee63050aaabf3c6b300df585eb958cdada3cf77de24d3791f25bc6d9d81"
+        ],
+        "purpose": "Compare actual spot repricing with fixed local first/second derivatives.",
+        "finding": "Authored European call baseline and full shock grid execute; SQL builds Taylor estimates and plots actual residuals. Separate call/put statements avoid measured runtime binding issue, parity and textbook checks verify outcomes. Central small-bump derivatives independently reconcile analytic delta/gamma; no hedge-profit claim."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "bs_gamma"
+      },
+      "notebook": "01_local_greeks_and_full_repricing.ipynb",
+      "sql": [
+        {
+          "cell": "2c119300",
+          "reference": "quant.main.bs_gamma"
+        }
+      ],
+      "narrative_cells": [
+        "6cb41c02",
+        "6eab316b",
+        "6257a180"
+      ],
+      "result_cells": [
+        "52514506",
+        "bf6b8732",
+        "88f4f20d",
+        "63031982",
+        "6b334da2"
+      ],
+      "interpretation_cells": [
+        "63031982",
+        "ce3f951f"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_earthquakes",
+        "reviewed_at": "2026-11-15T01:32:37.518372+00:00",
+        "notebook_sha256": "833591ded3b486f479b42fa2b4b8b0ca91516dbdbff6e11b179d036f8968670e",
+        "catalog_sha256": [
+          "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb",
+          "62787ee63050aaabf3c6b300df585eb958cdada3cf77de24d3791f25bc6d9d81"
+        ],
+        "purpose": "Compare actual spot repricing with fixed local first/second derivatives.",
+        "finding": "Authored European call baseline and full shock grid execute; SQL builds Taylor estimates and plots actual residuals. Separate call/put statements avoid measured runtime binding issue, parity and textbook checks verify outcomes. Central small-bump derivatives independently reconcile analytic delta/gamma; no hedge-profit claim."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "implied_vol"
+      },
+      "notebook": "01_local_greeks_and_full_repricing.ipynb",
+      "sql": [
+        {
+          "cell": "a29140cd",
+          "reference": "quant.main.implied_vol"
+        }
+      ],
+      "narrative_cells": [
+        "6257a180",
+        "94bed8f8"
+      ],
+      "result_cells": [
+        "63031982",
+        "6b334da2"
+      ],
+      "interpretation_cells": [
+        "63031982",
+        "6257a180"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_earthquakes",
+        "reviewed_at": "2026-11-15T01:32:37.518372+00:00",
+        "notebook_sha256": "833591ded3b486f479b42fa2b4b8b0ca91516dbdbff6e11b179d036f8968670e",
+        "catalog_sha256": [
+          "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb",
+          "62787ee63050aaabf3c6b300df585eb958cdada3cf77de24d3791f25bc6d9d81"
+        ],
+        "purpose": "Invert each computed call price to test numerical consistency of the model scenario grid.",
+        "finding": "Displayed recovered volatility and maximum residual use actual price outputs, with documented standard-deviation-to-volatility tolerance. Same call model/input horizon, not market calibration."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "bond_price"
+      },
+      "notebook": "02_clean_quotes_and_yield_shocks.ipynb",
+      "sql": [
+        {
+          "cell": "baseline-query",
+          "reference": "quant.main.bond_price"
+        }
+      ],
+      "narrative_cells": [
+        "question",
+        "units-story",
+        "baseline-story",
+        "errors-story"
+      ],
+      "result_cells": [
+        "units-finding",
+        "baseline-finding",
+        "curves-chart",
+        "errors-chart",
+        "summary-finding",
+        "checks-finding"
+      ],
+      "interpretation_cells": [
+        "units-finding",
+        "summary-finding",
+        "experiment-story"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_earthquakes",
+        "reviewed_at": "2026-11-15T01:32:37.518372+00:00",
+        "notebook_sha256": "67ad807a3e8e84cae4366f700d2915583b2ea61c9e39482b28b4ebc36d75cbf4",
+        "catalog_sha256": [
+          "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb",
+          "62787ee63050aaabf3c6b300df585eb958cdada3cf77de24d3791f25bc6d9d81"
+        ],
+        "purpose": "Distinguish bond quote units and compare full yield repricing with fixed duration/convexity estimates.",
+        "finding": "Three2/5/10year semiannual models share initial coupon/yield5%; actual face100/1000probe verifies quotes per100nominal despite metadata wording. SQL converts basispoints before Taylor arithmetic, compares residuals over symmetric grid, checks monotonicity and preserves null behavior. Fixed2026-06-15 issue-date construction, not a traded bond return."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "bond_duration"
+      },
+      "notebook": "02_clean_quotes_and_yield_shocks.ipynb",
+      "sql": [
+        {
+          "cell": "baseline-query",
+          "reference": "quant.main.bond_duration"
+        }
+      ],
+      "narrative_cells": [
+        "question",
+        "units-story",
+        "baseline-story",
+        "errors-story"
+      ],
+      "result_cells": [
+        "units-finding",
+        "baseline-finding",
+        "curves-chart",
+        "errors-chart",
+        "summary-finding",
+        "checks-finding"
+      ],
+      "interpretation_cells": [
+        "units-finding",
+        "summary-finding",
+        "experiment-story"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_earthquakes",
+        "reviewed_at": "2026-11-15T01:32:37.518372+00:00",
+        "notebook_sha256": "67ad807a3e8e84cae4366f700d2915583b2ea61c9e39482b28b4ebc36d75cbf4",
+        "catalog_sha256": [
+          "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb",
+          "62787ee63050aaabf3c6b300df585eb958cdada3cf77de24d3791f25bc6d9d81"
+        ],
+        "purpose": "Distinguish bond quote units and compare full yield repricing with fixed duration/convexity estimates.",
+        "finding": "Three2/5/10year semiannual models share initial coupon/yield5%; actual face100/1000probe verifies quotes per100nominal despite metadata wording. SQL converts basispoints before Taylor arithmetic, compares residuals over symmetric grid, checks monotonicity and preserves null behavior. Fixed2026-06-15 issue-date construction, not a traded bond return."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "bond_convexity"
+      },
+      "notebook": "02_clean_quotes_and_yield_shocks.ipynb",
+      "sql": [
+        {
+          "cell": "baseline-query",
+          "reference": "quant.main.bond_convexity"
+        }
+      ],
+      "narrative_cells": [
+        "question",
+        "units-story",
+        "baseline-story",
+        "errors-story"
+      ],
+      "result_cells": [
+        "units-finding",
+        "baseline-finding",
+        "curves-chart",
+        "errors-chart",
+        "summary-finding",
+        "checks-finding"
+      ],
+      "interpretation_cells": [
+        "units-finding",
+        "summary-finding",
+        "experiment-story"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_earthquakes",
+        "reviewed_at": "2026-11-15T01:32:37.518372+00:00",
+        "notebook_sha256": "67ad807a3e8e84cae4366f700d2915583b2ea61c9e39482b28b4ebc36d75cbf4",
+        "catalog_sha256": [
+          "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb",
+          "62787ee63050aaabf3c6b300df585eb958cdada3cf77de24d3791f25bc6d9d81"
+        ],
+        "purpose": "Distinguish bond quote units and compare full yield repricing with fixed duration/convexity estimates.",
+        "finding": "Three2/5/10year semiannual models share initial coupon/yield5%; actual face100/1000probe verifies quotes per100nominal despite metadata wording. SQL converts basispoints before Taylor arithmetic, compares residuals over symmetric grid, checks monotonicity and preserves null behavior. Fixed2026-06-15 issue-date construction, not a traded bond return."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "bond_yield"
+      },
+      "notebook": "02_clean_quotes_and_yield_shocks.ipynb",
+      "sql": [
+        {
+          "cell": "repricing-query",
+          "reference": "quant.main.bond_yield"
+        }
+      ],
+      "narrative_cells": [
+        "repricing-story",
+        "checks-story"
+      ],
+      "result_cells": [
+        "curves-chart",
+        "summary-finding",
+        "checks-finding"
+      ],
+      "interpretation_cells": [
+        "summary-finding",
+        "experiment-story"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_earthquakes",
+        "reviewed_at": "2026-11-15T01:32:37.518372+00:00",
+        "notebook_sha256": "67ad807a3e8e84cae4366f700d2915583b2ea61c9e39482b28b4ebc36d75cbf4",
+        "catalog_sha256": [
+          "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb",
+          "62787ee63050aaabf3c6b300df585eb958cdada3cf77de24d3791f25bc6d9d81"
+        ],
+        "purpose": "Round-trip model clean quotes into the annual compounded yields used to produce them.",
+        "finding": "Every computed quote is inverted; full table and maximum residual expressed in basispoints and checked within0.001bp. Interpretation distinguishes numerical inversion from observed market yield discovery."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "day_count_conventions"
+      },
+      "notebook": "03_dates_conventions_and_present_value.ipynb",
+      "sql": [
+        {
+          "cell": "registry-query",
+          "reference": "quant.main.day_count_conventions"
+        }
+      ],
+      "narrative_cells": [
+        "registry-story"
+      ],
+      "result_cells": [
+        "registry-finding",
+        "fractions-chart",
+        "discount-chart"
+      ],
+      "interpretation_cells": [
+        "registry-finding",
+        "fractions-story",
+        "discount-story"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_earthquakes",
+        "reviewed_at": "2026-11-15T01:32:37.518372+00:00",
+        "notebook_sha256": "ed54b77e6e3c5a422e3990512c7faf927aa4b7a9b437380948c5313c6bde2bfa",
+        "catalog_sha256": [
+          "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb",
+          "62787ee63050aaabf3c6b300df585eb958cdada3cf77de24d3791f25bc6d9d81"
+        ],
+        "purpose": "Discover and enforce the full convention comparison population.",
+        "finding": "All four actual advertised strings must match evaluated names before/after processing; each convention contributes six roster rows and an interpreted known-row subtotal. Registry is used to gate and audit the comparison, not merely listed."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "year_fraction"
+      },
+      "notebook": "03_dates_conventions_and_present_value.ipynb",
+      "sql": [
+        {
+          "cell": "fractions-query",
+          "reference": "quant.main.year_fraction"
+        }
+      ],
+      "narrative_cells": [
+        "inputs-story",
+        "fractions-story"
+      ],
+      "result_cells": [
+        "fractions-chart",
+        "discount-chart",
+        "checks-finding"
+      ],
+      "interpretation_cells": [
+        "fractions-story",
+        "discount-chart",
+        "experiment-story"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_earthquakes",
+        "reviewed_at": "2026-11-15T01:32:37.518372+00:00",
+        "notebook_sha256": "ed54b77e6e3c5a422e3990512c7faf927aa4b7a9b437380948c5313c6bde2bfa",
+        "catalog_sha256": [
+          "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb",
+          "62787ee63050aaabf3c6b300df585eb958cdada3cf77de24d3791f25bc6d9d81"
+        ],
+        "purpose": "Translate identical authored dates to different model horizons while retaining zero and missing controls.",
+        "finding": "Four literal-convention variants materialized separately; actualdays independently reconcile ACT360/ACT365. Plot shows differences fromACT365, includes explicit excluded control descriptions, and actual ISDA/USBondBasis results remain distinct."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "discount_factor"
+      },
+      "notebook": "03_dates_conventions_and_present_value.ipynb",
+      "sql": [
+        {
+          "cell": "fractions-query",
+          "reference": "quant.main.discount_factor"
+        }
+      ],
+      "narrative_cells": [
+        "discount-story",
+        "inputs-story",
+        "checks-story"
+      ],
+      "result_cells": [
+        "fractions-chart",
+        "discount-chart",
+        "checks-finding"
+      ],
+      "interpretation_cells": [
+        "discount-chart",
+        "discount-story",
+        "experiment-story"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_earthquakes",
+        "reviewed_at": "2026-11-15T01:32:37.518372+00:00",
+        "notebook_sha256": "ed54b77e6e3c5a422e3990512c7faf927aa4b7a9b437380948c5313c6bde2bfa",
+        "catalog_sha256": [
+          "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb",
+          "62787ee63050aaabf3c6b300df585eb958cdada3cf77de24d3791f25bc6d9d81"
+        ],
+        "purpose": "Discount the same six-row payment roster at an explicitly continuous rate and audit known-row subtotals.",
+        "finding": "Actual factors and present values reconcile independent exp(-rate*years) and amount*factor formulas. One known zero and one missing-date amount persist per convention; charts label five-valued-row subtotal, never complete schedule value. Rate-only experiment preserves dates/yearfractions and compares positive future cashflows."
+      }
+    },
+    {
+      "object": {
+        "schema": "main",
+        "name": "present_value"
+      },
+      "notebook": "03_dates_conventions_and_present_value.ipynb",
+      "sql": [
+        {
+          "cell": "fractions-query",
+          "reference": "quant.main.present_value"
+        }
+      ],
+      "narrative_cells": [
+        "discount-story",
+        "inputs-story",
+        "checks-story"
+      ],
+      "result_cells": [
+        "fractions-chart",
+        "discount-chart",
+        "checks-finding"
+      ],
+      "interpretation_cells": [
+        "discount-chart",
+        "discount-story",
+        "experiment-story"
+      ],
+      "review": {
+        "status": "approved",
+        "reviewer": "Codex /root/notebooks_earthquakes",
+        "reviewed_at": "2026-11-15T01:32:37.518372+00:00",
+        "notebook_sha256": "ed54b77e6e3c5a422e3990512c7faf927aa4b7a9b437380948c5313c6bde2bfa",
+        "catalog_sha256": [
+          "83c66bec81e3a638241c39acf25a551a2dd52a71c75983f4ed77769b294187bb",
+          "62787ee63050aaabf3c6b300df585eb958cdada3cf77de24d3791f25bc6d9d81"
+        ],
+        "purpose": "Discount the same six-row payment roster at an explicitly continuous rate and audit known-row subtotals.",
+        "finding": "Actual factors and present values reconcile independent exp(-rate*years) and amount*factor formulas. One known zero and one missing-date amount persist per convention; charts label five-valued-row subtotal, never complete schedule value. Rate-only experiment preserves dates/yearfractions and compares positive future cashflows."
+      }
+    }
+  ]
+}

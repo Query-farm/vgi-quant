@@ -1,0 +1,12 @@
+{
+  "query": "SELECT quant.main.bs_price(100,100,0.05,0.2,1,'put') AS p",
+  "captured_at": "2026-11-15T01:24:29.097931+00:00",
+  "columns": [
+    "p"
+  ],
+  "rows": [
+    [
+      5.573526022256966
+    ]
+  ]
+}
