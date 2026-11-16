@@ -4,7 +4,7 @@
 #     # Floored at 0.51.0: the released signed vgi community extension speaks
 #     # VGI protocol vgi.v3 / 3.3; older vgi-python lines fail ATTACH with a
 #     # protocol_version mismatch. Keep in sync with pyproject.toml.
-#     "vgi-python[http]>=0.51.0",
+#     "vgi-python[http]>=0.52.0",
 #     "QuantLib>=1.42",
 #     "pyarrow",
 # ]
