@@ -6,7 +6,7 @@
 # See docker-entrypoint.sh. Keyless, stateless, offline: option/bond/day-count math is
 # pure QuantLib compute in-process. No persistent state volume.
 # syntax=docker/dockerfile:1
-FROM python:3.13-slim
+FROM python:3.14-slim
 
 ARG VERSION=0.0.0
 ARG GIT_COMMIT=unknown

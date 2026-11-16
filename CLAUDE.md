@@ -137,7 +137,7 @@ make test                     # both
 uv run ruff check . && uv run mypy vgi_quant/
 ```
 
-`make test-sql` sets `VGI_QUANT_WORKER="uv run --python 3.13 quant_worker.py"`,
+`make test-sql` sets `VGI_QUANT_WORKER="uv run --python 3.14 quant_worker.py"`,
 puts `~/.local/bin` on PATH, and runs `haybarn-unittest --keep-home --test-dir . "test/sql/*"`.
 Install the runner once: `uv tool install --prerelease allow 'haybarn-unittest>=2.0.0rc11,<2.1'`. CI
 (`.github/workflows/ci.yml`) runs unit + lint + a gated `e2e` job that installs
